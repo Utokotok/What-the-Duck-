@@ -27,6 +27,8 @@ public class Cloud {
         cloudW = sprite.getRegionWidth() * scale;
         position = new Vector2(- 2 * cloudW, MathUtils.random(270, GameLauncher.gameHeight - cloudH));
         velocity = new Vector2(MathUtils.random(MIN_SPEED, MAX_SPEED), 0);
+        sprite.setSize(cloudW, cloudH);
+        sprite.setAlpha(opacity);
     }
 
     public void updateState(){
@@ -38,8 +40,6 @@ public class Cloud {
 
     public Sprite getSprite(){
         sprite.setPosition(position.x, position.y);
-        sprite.setSize(cloudW, cloudH);
-        sprite.setAlpha(opacity);
         return sprite;
     }
 }
