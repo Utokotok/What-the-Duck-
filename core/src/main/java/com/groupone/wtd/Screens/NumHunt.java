@@ -118,18 +118,24 @@ public class NumHunt implements Screen {
         //egg
         egg.getSprite().draw(game.batch);
         game.batch.end();
-        //impact frame
-        drawImpactFrame();
-        if(pauseMenu.isExpanded){
+
+        if(pauseMenu.isExpanded || impactFrameState <= IMPACT_FRAME_CD){
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.setColor(0,0,0, 0.8f);
-            shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
-            shapeRenderer.rect(0, 0, GameLauncher.gameWidth, GameLauncher.gameHeight);
+
+            if(pauseMenu.isExpanded){
+                expandPause();
+            }
+
+            if(impactFrameState <= IMPACT_FRAME_CD){
+                drawImpactFrame();
+            }
+
             shapeRenderer.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
         }
+
         pauseMenu.getStage(Gdx.graphics.getDeltaTime()).draw();
     }
 
@@ -207,9 +213,11 @@ public class NumHunt implements Screen {
     }
 
     private void updateMousePos(){
-        mouseOrigPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
-        game.viewport.unproject(mouseOrigPos);
-        mousePos.set(mouseOrigPos.x, mouseOrigPos.y);
+        if(Gdx.input.getDeltaX() != 0 || Gdx.input.getDeltaY() != 0){
+            mouseOrigPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
+            game.viewport.unproject(mouseOrigPos);
+            mousePos.set(mouseOrigPos.x, mouseOrigPos.y);
+        }
     }
 
     //function for impact frames
@@ -218,17 +226,15 @@ public class NumHunt implements Screen {
     }
 
     private void drawImpactFrame(){
-        if(impactFrameState <= IMPACT_FRAME_CD){
-            Gdx.gl.glEnable(GL20.GL_BLEND);
-            Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-            shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
-            shapeRenderer.setColor(1,1,1, 0.9f);
-            shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            shapeRenderer.rect(0,0,GameLauncher.gameWidth, GameLauncher.gameHeight);
-            shapeRenderer.end();
-            Gdx.gl.glDisable(GL20.GL_BLEND);
-        }
+        shapeRenderer.setColor(1,1,1, 0.9f);
+        shapeRenderer.rect(0,0,GameLauncher.gameWidth, GameLauncher.gameHeight);
     }
+
+    private void expandPause(){
+        shapeRenderer.setColor(0,0,0, 0.8f);
+        shapeRenderer.rect(0, 0, GameLauncher.gameWidth, GameLauncher.gameHeight);
+    }
+
     @Override
     public void resize(int width, int height) {
         game.viewport.update(width, height, true);

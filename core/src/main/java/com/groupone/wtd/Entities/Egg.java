@@ -1,11 +1,9 @@
 package com.groupone.wtd.Entities;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Utils.Utils;
 
@@ -33,7 +31,6 @@ public class Egg {
     }
 
     public void triggerEgg(float x, float y){
-        System.out.println("dadwa");
         eggStateTime = 0f;
         eggFadeState = 1f;
         this.x = x;
