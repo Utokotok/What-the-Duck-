@@ -3,6 +3,7 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.groupone.wtd.Assets.AnimationManager;
 import com.groupone.wtd.Assets.Assets;
 import com.groupone.wtd.Screens.MainMenu;
 
@@ -18,6 +19,7 @@ public class GameLauncher extends Game {
 
     @Override
     public void create() {
+        AnimationManager.setGame(this);
         Assets.loadMenuAssets();
         batch = new SpriteBatch();
         viewport = new FitViewport(gameWidth, gameHeight);

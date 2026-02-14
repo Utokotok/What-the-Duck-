@@ -27,6 +27,11 @@ public class Assets {
         manager.load("Guns/gun_shot.png", Texture.class);
         manager.load("Guns/egg_shot.png", Texture.class);
         manager.load("Background/clouds.png", Texture.class);
+        manager.load("Guns/division.png", Texture.class);
+        manager.load("Guns/sum.png", Texture.class);
+        manager.load("Guns/product.png", Texture.class);
+        manager.load("Guns/minus.png", Texture.class);
+        manager.load("Guns/change_mode.png", Texture.class);
 
         for(char color : duckColor){
             manager.load("Ducks/" + color +"_duck_down.png", Texture.class);

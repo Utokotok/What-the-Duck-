@@ -16,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.groupone.wtd.Assets.AnimationManager;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Input.InputHandler;
 import com.groupone.wtd.Utils.Utils;
@@ -122,6 +123,7 @@ public class MainMenu implements Screen {
             logoFrames = new Animation<>(0.2f, Utils.generateSheet(game.manager.get("Logo/wtd_logo.png"), 6, 1));
             logoFrames.setPlayMode(Animation.PlayMode.LOOP);
             initializeButtons();
+            AnimationManager.initializeDucks();
         }
     }
 

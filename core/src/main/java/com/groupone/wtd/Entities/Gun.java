@@ -14,11 +14,22 @@ import com.groupone.wtd.Utils.Utils;
 public class Gun {
     public float reloadCD = 0f;
     public final float RELOAD_TIME = 0.7f;
-    private final float EMOTE_CD = 0.5f;
-    boolean isEmoting = false;
     float gunShotStateTime = 0.7f;
-    float emoteStateTime = 0.5f;
     Sprite sprite;
+    Sprite modeSprite;
+
+    public int gunMode = 1;
+    public int[] availableGunMode = {1,1,1,1};
+    private Animation<TextureRegion> gunModeFrames;
+    private float gunModeState = 0f;
+
+    Animation<TextureRegion> divisionFrames;
+    Animation<TextureRegion> productFrames;
+    Animation<TextureRegion> minusFrames;
+    Animation<TextureRegion> sumFrames;
+    Animation<TextureRegion> changeFrames;
+    Animation<TextureRegion> currentMode;
+
     Animation<TextureRegion> currentFrames;
     Animation<TextureRegion> shotFrames;
     Animation<TextureRegion> cryFrames;
@@ -27,15 +38,29 @@ public class Gun {
 
     public Gun(GameLauncher game){
         sprite = new Sprite();
+        modeSprite = new Sprite();
         shotFrames = new Animation<>(0.033f, Utils.generateSheet(game.manager.get("Guns/gun_shot.png"), 3, 7));
         cryFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Guns/gun_crying.png"), 2, 1));
         laughFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Guns/gun_laughing.png"), 2, 1));
+        divisionFrames = new Animation<>(0.5f, Utils.generateSheet(game.manager.get("Guns/division.png"), 2, 1));
+        sumFrames = new Animation<>(0.5f, Utils.generateSheet(game.manager.get("Guns/sum.png"), 2, 1));
+        minusFrames = new Animation<>(0.5f, Utils.generateSheet(game.manager.get("Guns/minus.png"), 2, 1));
+        productFrames = new Animation<>(0.5f, Utils.generateSheet(game.manager.get("Guns/product.png"), 2, 1));
+        changeFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Guns/change_mode.png"), 4, 1));
+        currentMode = changeFrames;
+
+        divisionFrames.setPlayMode(Animation.PlayMode.LOOP);
+        sumFrames.setPlayMode(Animation.PlayMode.LOOP);
+        minusFrames.setPlayMode(Animation.PlayMode.LOOP);
+        productFrames.setPlayMode(Animation.PlayMode.LOOP);
+
         currentFrames = shotFrames;
     }
 
     public void updateState(){
         reloadCD += Gdx.graphics.getDeltaTime();
         gunShotStateTime += Gdx.graphics.getDeltaTime();
+        gunModeState += Gdx.graphics.getDeltaTime();
     }
 
     public void triggerGunShot(){
@@ -73,5 +98,32 @@ public class Gun {
         sprite.setPosition((GameLauncher.gameWidth / 2f) - frame.getRegionWidth() / 2f, -10);
         sprite.setRotation(Math.clamp(MathUtils.atan2Deg(mousePos.y, mousePos.x - GameLauncher.gameWidth / 2f) - 90, -50, 50));
         return sprite;
+    }
+
+    public void changeMode(int mode){
+        if(mode == gunMode || availableGunMode[mode - 1] == 0) return;
+        gunModeState = 0f;
+        gunMode = mode;
+    }
+
+    public Sprite getModeSprite(Vector2 mousePos){
+        if(gunModeState < 0.4){
+            currentMode = changeFrames;
+        } else{
+            switch(gunMode){
+                case 1 -> {currentMode = sumFrames;}
+                case 2 -> {currentMode = minusFrames;}
+                case 3 -> {currentMode = productFrames;}
+                case 4 -> {currentMode = divisionFrames;}
+            }
+        }
+        TextureRegion frame = currentMode.getKeyFrame(gunModeState);
+        modeSprite.setRegion(frame);
+        modeSprite.setSize(frame.getRegionWidth(), frame.getRegionHeight());
+        modeSprite.setPosition(60 + GameLauncher.gameWidth / 2f, 250);
+        modeSprite.setOrigin((frame.getRegionWidth() / 2f) - 60, -340f);
+        modeSprite.setRotation(Math.clamp(MathUtils.atan2Deg(mousePos.y, mousePos.x - GameLauncher.gameWidth / 2f) - 90, -50, 50));
+
+        return modeSprite;
     }
 }

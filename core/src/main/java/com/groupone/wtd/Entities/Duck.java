@@ -7,15 +7,19 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
+import com.groupone.wtd.Assets.AnimationManager;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Utils.Utils;
 
 public class Duck {
-    private final float CHANGE_DIRECTION_CD = 1f;
+    private float changeDirectionCD = 0.5f;
+    private float changeDirectionChance = 0.5f;
+    private float minSpeed = 200f;
+    private float maxSpeed = 600f;
+
     private float changeDirectionState = 0f;
-    private final float MIN_SPEED = 400f;
-    private final float MAX_SPEED = 600f;
     private Vector2 position;
     private Vector2 velocity;
 
@@ -31,15 +35,53 @@ public class Duck {
     private Sprite sprite;
     private float duckH;
     private float duckW;
-    private final float SCALE = 0.6f;
+    private final float SCALE = 0.5f;
     private Rectangle hitBox;
     private float stateTime = 0f;
     private GameLauncher game;
+    private int number;
+    private char letter;
 
-    public Duck(GameLauncher game){
+    public Duck(GameLauncher game, float minSpeed, float maxSpeed, float changeDirectionCD, float changeDirectionChance){
         this.game = game;
         this.hitBox = new Rectangle();
         this.sprite = new Sprite();
+        this.minSpeed = minSpeed;
+        this.maxSpeed = maxSpeed;
+        this.changeDirectionCD = changeDirectionCD;
+        this.changeDirectionChance = changeDirectionChance;
+        position = new Vector2(0, 0);
+        velocity = new Vector2();
+        initializeAnimation();
+        initializePosition();
+        handleRandomDirection();
+    }
+
+    public Duck(GameLauncher game, float minSpeed, float maxSpeed, float changeDirectionCD, float changeDirectionChance, int number){
+        this.game = game;
+        this.hitBox = new Rectangle();
+        this.number = number;
+        this.sprite = new Sprite();
+        this.minSpeed = minSpeed;
+        this.maxSpeed = maxSpeed;
+        this.changeDirectionCD = changeDirectionCD;
+        this.changeDirectionChance = changeDirectionChance;
+        position = new Vector2(0, 0);
+        velocity = new Vector2();
+        initializeAnimation();
+        initializePosition();
+        handleRandomDirection();
+    }
+
+    public Duck(GameLauncher game, float minSpeed, float maxSpeed, float changeDirectionCD, float changeDirectionChance, char letter){
+        this.game = game;
+        this.hitBox = new Rectangle();
+        this.letter = letter;
+        this.sprite = new Sprite();
+        this.minSpeed = minSpeed;
+        this.maxSpeed = maxSpeed;
+        this.changeDirectionCD = changeDirectionCD;
+        this.changeDirectionChance = changeDirectionChance;
         position = new Vector2(0, 0);
         velocity = new Vector2();
         initializeAnimation();
@@ -57,6 +99,9 @@ public class Duck {
         }
     }
 
+    public int getNumber(){
+        return number;
+    }
     public void handleShot(){
         isShot = true;
         velocity.x = 0;
@@ -77,18 +122,18 @@ public class Duck {
         }
     }
     private void initializeAnimation(){
-        char randomColor = 'w';
+        Array<Animation<TextureRegion>> duckAnimation = null;
         switch (MathUtils.random(1, 3)){
-            case 1 -> randomColor = 'y';
-            case 2-> randomColor = 'g';
-            case 3 -> randomColor = 'w';
+            case 1 -> {duckAnimation = AnimationManager.wDuck;}
+            case 2-> {duckAnimation = AnimationManager.gDuck;}
+            case 3 -> {duckAnimation = AnimationManager.yDuck;}
         }
 
-        fallFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Ducks/" + randomColor + "_duck_fall.png"), 4, 1));
-        downFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Ducks/" + randomColor +"_duck_down.png"), 2, 1));
-        upFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Ducks/" + randomColor + "_duck_up.png"), 4, 1));
-        leftFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Ducks/" + randomColor + "_duck_left.png"), 4, 1));
-        shockFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Ducks/" + randomColor +"_duck_shock.png"), 2, 1));
+        fallFrames = duckAnimation.get(0);
+        downFrames = duckAnimation.get(1);
+        upFrames = duckAnimation.get(2);
+        leftFrames = duckAnimation.get(3);
+        shockFrames = duckAnimation.get(4);
         currentFrame = downFrames;
         updateAnimation();
         updateSprite();
@@ -96,23 +141,22 @@ public class Duck {
 
     private void initializePosition(){
         boolean spawnLeft = MathUtils.randomBoolean();
-        float randomY = MathUtils.random(GameLauncher.GROUND_HEIGHT, GameLauncher.gameHeight);
-        position = new Vector2(spawnLeft ? 0 : GameLauncher.gameWidth - duckW, randomY);
+        position = new Vector2(spawnLeft ? 0 : GameLauncher.gameWidth - duckW, GameLauncher.GROUND_HEIGHT);
     }
 
     private void handleRandomDirection(){
-        if(changeDirectionState >= CHANGE_DIRECTION_CD){
+        if(changeDirectionState >= changeDirectionCD){
             double random = Math.random();
-            if(random <= 0.5) randomDirection();
+            if(random <= changeDirectionChance) randomDirection();
         } else{
             changeDirectionState += Gdx.graphics.getDeltaTime();
         }
     }
     private void randomDirection(){
-        float randX = MathUtils.random(-MAX_SPEED, MAX_SPEED);
-        float randY = MathUtils.random(-MAX_SPEED, MAX_SPEED);
-        randX = Math.max(Math.abs(randX), MIN_SPEED) * Math.signum(randX);
-        randY = Math.max(Math.abs(randY), MIN_SPEED) * Math.signum(randY);
+        float randX = MathUtils.random(-maxSpeed, maxSpeed);
+        float randY = MathUtils.random(-maxSpeed, maxSpeed);
+        randX = Math.max(Math.abs(randX), minSpeed) * Math.signum(randX);
+        randY = Math.max(Math.abs(randY), minSpeed) * Math.signum(randY);
         velocity.y = randY;
         velocity.x = randX;
         changeDirectionState = 0;
