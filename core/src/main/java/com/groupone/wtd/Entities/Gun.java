@@ -15,7 +15,7 @@ public class Gun {
     public float reloadCD = 0f;
     public final float RELOAD_TIME = 0.7f;
     float gunShotStateTime = 0.7f;
-    Sprite sprite;
+    Sprite gunSprite;
     Sprite modeSprite;
 
     public int gunMode = 1;
@@ -30,14 +30,14 @@ public class Gun {
     Animation<TextureRegion> changeFrames;
     Animation<TextureRegion> currentMode;
 
-    Animation<TextureRegion> currentFrames;
+    Animation<TextureRegion> currentGun;
     Animation<TextureRegion> shotFrames;
     Animation<TextureRegion> cryFrames;
     Animation<TextureRegion> laughFrames;
 
 
     public Gun(GameLauncher game){
-        sprite = new Sprite();
+        gunSprite = new Sprite();
         modeSprite = new Sprite();
         shotFrames = new Animation<>(0.033f, Utils.generateSheet(game.manager.get("Guns/gun_shot.png"), 3, 7));
         cryFrames = new Animation<>(0.1f, Utils.generateSheet(game.manager.get("Guns/gun_crying.png"), 2, 1));
@@ -54,7 +54,7 @@ public class Gun {
         minusFrames.setPlayMode(Animation.PlayMode.LOOP);
         productFrames.setPlayMode(Animation.PlayMode.LOOP);
 
-        currentFrames = shotFrames;
+        currentGun = shotFrames;
     }
 
     public void updateState(){
@@ -64,8 +64,8 @@ public class Gun {
     }
 
     public void triggerGunShot(){
-        currentFrames = shotFrames;
-        currentFrames.setPlayMode(Animation.PlayMode.NORMAL);
+        currentGun = shotFrames;
+        currentGun.setPlayMode(Animation.PlayMode.NORMAL);
         reloadCD = 0f;
         gunShotStateTime = 0f;
     }
@@ -74,8 +74,8 @@ public class Gun {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                currentFrames = cryFrames;
-                currentFrames.setPlayMode(Animation.PlayMode.LOOP);
+                currentGun = cryFrames;
+                currentGun.setPlayMode(Animation.PlayMode.LOOP);
             }
         }, 0.7f);
     }
@@ -84,20 +84,20 @@ public class Gun {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
-                currentFrames = laughFrames;
-                currentFrames.setPlayMode(Animation.PlayMode.LOOP);
+                currentGun = laughFrames;
+                currentGun.setPlayMode(Animation.PlayMode.LOOP);
             }
         }, 0.7f);
     }
 
     public Sprite getSprite(Vector2 mousePos){
-        TextureRegion frame = currentFrames.getKeyFrame(gunShotStateTime);
-        sprite.setRegion(frame);
-        sprite.setOrigin(frame.getRegionWidth() / 2f, -80);
-        sprite.setSize(frame.getRegionWidth(), frame.getRegionHeight());
-        sprite.setPosition((GameLauncher.gameWidth / 2f) - frame.getRegionWidth() / 2f, -10);
-        sprite.setRotation(Math.clamp(MathUtils.atan2Deg(mousePos.y, mousePos.x - GameLauncher.gameWidth / 2f) - 90, -50, 50));
-        return sprite;
+        TextureRegion frame = currentGun.getKeyFrame(gunShotStateTime);
+        gunSprite.setRegion(frame);
+        gunSprite.setOrigin(frame.getRegionWidth() / 2f, -80);
+        gunSprite.setSize(frame.getRegionWidth(), frame.getRegionHeight());
+        gunSprite.setPosition((GameLauncher.gameWidth / 2f) - frame.getRegionWidth() / 2f, -10);
+        gunSprite.setRotation(Math.clamp(MathUtils.atan2Deg(mousePos.y, mousePos.x - GameLauncher.gameWidth / 2f) - 90, -50, 50));
+        return gunSprite;
     }
 
     public void changeMode(int mode){
