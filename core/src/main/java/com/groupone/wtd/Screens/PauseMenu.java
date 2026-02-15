@@ -61,7 +61,6 @@ public class PauseMenu {
                 game.setScreen(new MainMenu(game));
             }
         });
-        stage.addActor(pauseButton);
         stage.addActor(continueButton);
         stage.addActor(quitButton);
     }

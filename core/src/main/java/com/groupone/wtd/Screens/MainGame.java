@@ -32,7 +32,8 @@ abstract class MainGame implements Screen {
     private float cloudSpawnerState = 0f;
     private Array<Cloud> clouds;
     private Rectangle shootableArea;
-
+    boolean isGameOver = false;
+    int points = 0;
     PauseMenu pauseMenu;
     Gun gun;
     Egg egg;
@@ -52,6 +53,9 @@ abstract class MainGame implements Screen {
     protected abstract void customInput();
     protected abstract void drawCustomMidGround();
     protected abstract void drawCustomForeground();
+    protected abstract void customClick();
+    protected abstract boolean isClickable();
+    protected abstract void customShape();
 
     public MainGame(GameLauncher game){
         this.game = game;
@@ -139,12 +143,13 @@ abstract class MainGame implements Screen {
         drawMidGround();
         drawForeground();
         game.batch.end();
+        customShape();
 
         if(pauseMenu.isExpanded || impactFrameState <= IMPACT_FRAME_CD){
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+            shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-
             if(pauseMenu.isExpanded){
                 expandPause();
             }
@@ -225,6 +230,8 @@ abstract class MainGame implements Screen {
     //function for clicks
     private void handleClick(){
         if(handler.wasClicked() && gun.reloadCD >= gun.RELOAD_TIME && shootableArea.contains(mousePos)){
+            if(!isClickable()) return;
+            customClick();
             detectDuckClick();
             gun.triggerGunShot();
             egg.triggerEgg(mousePos.x, mousePos.y);

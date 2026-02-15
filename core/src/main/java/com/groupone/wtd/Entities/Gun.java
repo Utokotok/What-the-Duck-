@@ -19,7 +19,7 @@ public class Gun {
     Sprite modeSprite;
 
     public int gunMode = 1;
-    public int[] availableGunMode = {1,1,1,1};
+    public int[] availableGunMode = {2,2,2,2};
     private Animation<TextureRegion> gunModeFrames;
     private float gunModeState = 0f;
 
@@ -55,6 +55,32 @@ public class Gun {
         productFrames.setPlayMode(Animation.PlayMode.LOOP);
 
         currentGun = shotFrames;
+    }
+
+    public void reloadGun(){
+        for(int i = 0; i < 4; i++){
+            availableGunMode[i] = MathUtils.clamp(availableGunMode[i] + 2, 0, 5);
+        }
+    }
+
+    public boolean checkIfOutOfAmmo(){
+        boolean isOut = true;
+        for(int i = 0; i < 4; i++){
+            if(availableGunMode[i] != 0){
+                isOut = false;
+                break;
+            }
+        }
+
+        return isOut;
+    }
+
+    public boolean checkAvailableAmmo(int mode){
+        return availableGunMode[mode - 1] != 0;
+    }
+
+    public void consumeAmmo(int mode){
+        availableGunMode[mode - 1] -= 1;
     }
 
     public void updateState(){
@@ -101,7 +127,6 @@ public class Gun {
     }
 
     public void changeMode(int mode){
-        if(mode == gunMode || availableGunMode[mode - 1] == 0) return;
         gunModeState = 0f;
         gunMode = mode;
     }

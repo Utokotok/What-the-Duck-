@@ -32,6 +32,7 @@ public class Assets {
         manager.load("Guns/product.png", Texture.class);
         manager.load("Guns/minus.png", Texture.class);
         manager.load("Guns/change_mode.png", Texture.class);
+        manager.load("UI/wooden_board.png", Texture.class);
 
         for(char color : duckColor){
             manager.load("Ducks/" + color +"_duck_down.png", Texture.class);
