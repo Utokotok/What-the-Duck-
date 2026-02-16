@@ -11,29 +11,32 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.groupone.wtd.Entities.Duck;
 import com.groupone.wtd.GameLauncher;
+import com.groupone.wtd.Utils.Utils;
 
 import java.util.Arrays;
 
 public class NumHunt extends MainGame {
-    float currentNumber = 0;
-    float numberToGuess;
+    int currentNumber = 0;
+    int numberToGuess;
     int[] duckNumbers;
     int shots = 0;
     int baseScore = 200;
-    BitmapFont numberFont;
-    FreeTypeFontGenerator numberGenerator;
-    FreeTypeFontGenerator.FreeTypeFontParameter numberParameter;
-    BitmapFont duckNumberFont;
-    FreeTypeFontGenerator duckNumberGenerator;
-    FreeTypeFontGenerator.FreeTypeFontParameter duckNumberParameter;
-    BitmapFont stringFont;
-    FreeTypeFontGenerator stringGenerator;
-    FreeTypeFontGenerator.FreeTypeFontParameter stringParameter;
-
+    float changeDirectionCD = 1.2f;
+    int level = 0;
+    int streak = 1;
+    int maxNumber = 10;
+    int minNumber = 1;
 
     @Override
     protected void customLogic() {
+        if(gun.checkIfOutOfAmmo() || ducks.size == 0 && (currentNumber != numberToGuess)){
+            isGameOver = true;
+        }
+
         if(currentNumber == numberToGuess){
+            level++;
+            maxNumber = Math.min(maxNumber + 5, 20);
+            minNumber = Math.min(minNumber + 2, 10);
             currentNumber = 0;
             points +=  baseScore / shots;
             shots = 0;
@@ -41,6 +44,14 @@ public class NumHunt extends MainGame {
             gun.reloadGun();
             spawnDucks();
         }
+
+        changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
+
+        for(Duck duck : ducks){
+            duck.setMinMaxVelocity(streak);
+            duck.setChangeDirectionCD(changeDirectionCD);
+        }
+
     }
 
     @Override
@@ -62,7 +73,7 @@ public class NumHunt extends MainGame {
     @Override
     protected void drawCustomMidGround() {
         for(Duck duck : ducks){
-            duckNumberFont.draw(game.batch, String.valueOf(duck.getNumber()), duck.getHitBox().getX() + duck.getHitBox().getWidth() / 2f - 10, duck.getHitBox().getY() + duck.getHitBox().getHeight());
+            game.duckNumberFont.draw(game.batch, String.valueOf(duck.getNumber()), duck.getHitBox().getX() + duck.getHitBox().getWidth() / 2f - 10, duck.getHitBox().getY() + duck.getHitBox().getHeight());
         }
     }
 
@@ -75,9 +86,6 @@ public class NumHunt extends MainGame {
     protected void customClick() {
         gun.consumeAmmo(gun.gunMode);
         shots++;
-        if(gun.checkIfOutOfAmmo() && (currentNumber != numberToGuess)){
-            isGameOver = true;
-        }
     }
 
     @Override
@@ -102,6 +110,11 @@ public class NumHunt extends MainGame {
         customText();
     }
 
+    @Override
+    protected void customFailHit() {
+        streak = 1;
+    }
+
     private void drawRoundedRect(float x, float y, float width, float height, float radius) {
         shapeRenderer.rect(x + radius, y, width - (2 * radius), height);
         shapeRenderer.rect(x, y + radius, radius, height - (2 * radius));
@@ -112,53 +125,22 @@ public class NumHunt extends MainGame {
         shapeRenderer.arc(x + radius, y + height - radius, radius, 90f, 90f); // TL
     }
 
-    private String padNumber(float value) {
-        int whole = (int) Math.abs(value);
-        int decimal = (int) ((Math.abs(value) * 100) % 100);
-        return value > 0 ? "+" + String.format("%02d.%02d", whole, Math.abs(decimal)) : "-" + String.format("%02d.%02d", whole, Math.abs(decimal));
-    }
-
     protected void customText() {
         game.batch.begin();
-        stringFont.draw(game.batch, "GIVEN", 70, 88);
-        numberFont.draw(game.batch, padNumber(numberToGuess), 35, 63);
-        stringFont.draw(game.batch, "CURRENT", 250, 88);
-        numberFont.draw(game.batch, padNumber(currentNumber), 225, 63);
-        stringFont.draw(game.batch, "POINTS", GameLauncher.gameWidth - 175, 88);
-        numberFont.draw(game.batch, String.format("%07d", points), GameLauncher.gameWidth - 235, 63);
-        stringFont.draw(game.batch, "AMMO", GameLauncher.gameWidth - 352, 88);
-        numberFont.draw(game.batch, gun.availableGunMode[gun.gunMode - 1] + "/5", GameLauncher.gameWidth - 360, 63);
-//        numberFont.draw(game.batch, String.valueOf(numberToGuess), 20, 50);
+        game.UIFont3.draw(game.batch, "GIVEN", 70, 88);
+        game.numberFont.draw(game.batch, Utils.padNumber(numberToGuess), 35, 63);
+        game.UIFont3.draw(game.batch, "CURRENT", 250, 88);
+        game.numberFont.draw(game.batch, Utils.padNumber(currentNumber), 225, 63);
+        game.UIFont3.draw(game.batch, "POINTS", GameLauncher.gameWidth - 175, 88);
+        game.numberFont.draw(game.batch, String.format("%07d", points), GameLauncher.gameWidth - 235, 63);
+        game.UIFont3.draw(game.batch, "AMMO", GameLauncher.gameWidth - 352, 88);
+        game.numberFont.draw(game.batch, gun.availableGunMode[gun.gunMode - 1] + "/5", GameLauncher.gameWidth - 360, 63);
         game.batch.end();
     }
 
     public NumHunt(GameLauncher game) {
         super(game);
-        numberGenerator = new FreeTypeFontGenerator(Gdx.files.internal("number_font.ttf"));
-        numberParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        numberParameter.size = 45;
-        numberParameter.color = Color.WHITE;
-        numberParameter.borderColor = Color.BLACK;
-        numberParameter.borderWidth = 2;
-        numberFont = numberGenerator.generateFont(numberParameter);
-
-        stringGenerator = new FreeTypeFontGenerator(Gdx.files.internal("string_font.ttf"));
-        stringParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        stringParameter.size = 25;
-        stringParameter.color = Color.WHITE;
-        stringParameter.borderColor = Color.BLACK;
-        stringParameter.borderWidth = 2;
-        stringFont = stringGenerator.generateFont(stringParameter);
-
-        duckNumberGenerator = new FreeTypeFontGenerator(Gdx.files.internal("number_font.ttf"));
-        duckNumberParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-        duckNumberParameter.size = 70;
-        duckNumberParameter.color = Color.WHITE;
-        duckNumberParameter.borderColor = Color.BLACK;
-        duckNumberParameter.borderWidth = 2;
-        duckNumberFont = duckNumberGenerator.generateFont(duckNumberParameter);
-
-        generateRandomEquation(1, 10);
+        generateRandomEquation(minNumber, maxNumber);
         spawnDucks();
     }
 
@@ -166,24 +148,24 @@ public class NumHunt extends MainGame {
     protected void spawnDucks() {
         ducks.clear();
         for(int i = 0; i < duckNumbers.length; i++){
-            ducks.add(new Duck(game, 300, 500, 0.5f, 0.5f, duckNumbers[i]));
+            ducks.add(new Duck(game, 300, 500, changeDirectionCD, 0.5f, duckNumbers[i]));
         }
     }
 
     @Override
     protected void customDuckHit(Duck duck) {
+        streak++;
         switch (gun.gunMode){
             case 1 -> {currentNumber += duck.getNumber();}
             case 2 -> {currentNumber -= duck.getNumber();}
             case 3 -> {currentNumber *= duck.getNumber();}
             case 4 -> {currentNumber /= duck.getNumber();}
         }
-        currentNumber = Math.round(currentNumber * 100f) / 100f;
     }
 
     public void generateRandomEquation(int startRange, int endRange){
-        float number = 0;
         int[] randomNumbers;
+        int number = 0;
         do{
             Array<Integer> randomOperators = new Array<>();
             randomOperators.addAll(0, 1, 2, 3);
@@ -197,10 +179,23 @@ public class NumHunt extends MainGame {
             }
 
             int counter = 0;
-
+            number = randomNumbers[counter];
+            counter++;
             for(int i = 0; i < randomOperators.size; i++){
-                number = Math.round(calculate(number, randomNumbers[counter], operators[randomOperators.get(i)]) * 100f) / 100f;
-                System.out.println(number);
+                if(randomOperators.get(i) == 3){
+                    if(number % randomNumbers[counter] == 0){
+                        number = calculate(number, randomNumbers[counter], operators[randomOperators.get(i)]);
+                    } else{
+                        int guessNum = randomNumbers[counter];
+                        while(number % guessNum != 0 && guessNum > 1){
+                            guessNum--;
+                        }
+                        randomNumbers[counter] = guessNum;
+                        number = calculate(number, randomNumbers[counter], operators[randomOperators.get(i)]);
+                    }
+                } else{
+                    number = calculate(number, randomNumbers[counter], operators[randomOperators.get(i)]);
+                }
                 counter++;
             }
         } while(number == 0);
@@ -210,7 +205,7 @@ public class NumHunt extends MainGame {
         System.out.println(Arrays.toString(duckNumbers));
     }
 
-    private float calculate(float a, float b, String operator) {
+    private int calculate(int a, int b, String operator) {
         return switch (operator) {
             case "+" -> a + b;
             case "-" -> a - b;

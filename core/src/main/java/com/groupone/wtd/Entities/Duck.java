@@ -16,8 +16,10 @@ import com.groupone.wtd.Utils.Utils;
 public class Duck {
     private float changeDirectionCD = 0.5f;
     private float changeDirectionChance = 0.5f;
-    private float minSpeed = 200f;
-    private float maxSpeed = 600f;
+    private float baseMinSpeed = 100f;
+    private float baseMaxSpeed = 400f;
+    private float minSpeed = 100f;
+    private float maxSpeed = 400f;
 
     private float changeDirectionState = 0f;
     private Vector2 position;
@@ -71,6 +73,15 @@ public class Duck {
         initializeAnimation();
         initializePosition();
         handleRandomDirection();
+    }
+
+    public void setChangeDirectionCD(float changeDirectionCD){
+        this.changeDirectionCD = changeDirectionCD;
+    }
+
+    public void setMinMaxVelocity(int streak){
+        maxSpeed = Math.min(baseMaxSpeed + streak * 100, 1000);
+        minSpeed = Math.min(baseMinSpeed + streak * 100, 500);
     }
 
     public Duck(GameLauncher game, float minSpeed, float maxSpeed, float changeDirectionCD, float changeDirectionChance, char letter){

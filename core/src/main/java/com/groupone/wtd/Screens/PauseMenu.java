@@ -19,10 +19,12 @@ public class PauseMenu {
     ImageButton quitButton;
     ImageButton pauseButton;
     ImageButton continueButton;
-    boolean isExpanded = false;
+    MainGame currGame;
+    public boolean isExpanded = false;
 
-    public PauseMenu(GameLauncher game){
+    public PauseMenu(GameLauncher game, MainGame currGame){
         this.game = game;
+        this.currGame = currGame;
         stage = new Stage(game.viewport);
         quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), GameLauncher.gameWidth / 2f, (GameLauncher.gameHeight / 2f), QUIT_SCALE);
         pauseButton = Utils.createButton(game.manager.get("Buttons/pause.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight / 2f, PAUSE_SCALE);
@@ -34,7 +36,7 @@ public class PauseMenu {
         stage.addListener(new InputListener() {
             @Override
             public boolean keyDown(InputEvent event, int keycode) {
-                if (keycode == Input.Keys.ESCAPE) {
+                if (keycode == Input.Keys.ESCAPE && !currGame.isGameOver) {
                     isExpanded = !isExpanded;
                     return true;
                 }

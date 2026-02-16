@@ -1,6 +1,7 @@
 package com.groupone.wtd.Screens;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -43,6 +44,7 @@ abstract class MainGame implements Screen {
     Texture background;
     InputMultiplexer inputMultiplexer;
     InputHandler handler;
+    GameOver gameOver;
     Animation<TextureRegion> gunShotFrames;
     ShapeRenderer shapeRenderer;
     Vector2 gameCenter = new Vector2(0,0);
@@ -56,18 +58,20 @@ abstract class MainGame implements Screen {
     protected abstract void customClick();
     protected abstract boolean isClickable();
     protected abstract void customShape();
+    protected abstract void customFailHit();
 
     public MainGame(GameLauncher game){
         this.game = game;
         this.gun = new Gun(game);
+        gameOver = new GameOver(game, this);
         shootableArea = new Rectangle(0, GameLauncher.GROUND_HEIGHT, 1280, 720);
         clouds = new Array<>();
         egg = new Egg(game);
         shapeRenderer = new ShapeRenderer();
         handler = new InputHandler();
-        pauseMenu = new PauseMenu(game);
+        pauseMenu = new PauseMenu(game, this);
         ducks = new Array<>(DUCK_SPAWN_SIZE);
-        inputMultiplexer = new InputMultiplexer(pauseMenu.getStage(0), handler);
+        inputMultiplexer = new InputMultiplexer(pauseMenu.getStage(0), gameOver.getStage(), handler);
         Gdx.input.setInputProcessor(inputMultiplexer);
         gunShotFrames = new Animation<>(0.05f, Utils.generateSheet(game.manager.get("Guns/gun_shot.png"), 3, 7));
         bush = game.manager.get("Background/bush.png");
@@ -88,6 +92,7 @@ abstract class MainGame implements Screen {
 
     private void logic(){
         if(pauseMenu.isExpanded) return;
+        if(isGameOver) gameOver.updateGameOver(Gdx.graphics.getDeltaTime());
         //randomly spawn clouds
 //        spawnClouds();
         //update cloud, duck, gun
@@ -145,12 +150,13 @@ abstract class MainGame implements Screen {
         game.batch.end();
         customShape();
 
-        if(pauseMenu.isExpanded || impactFrameState <= IMPACT_FRAME_CD){
+        if(pauseMenu.isExpanded || impactFrameState <= IMPACT_FRAME_CD || isGameOver){
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-            if(pauseMenu.isExpanded){
+
+            if(pauseMenu.isExpanded || isGameOver){
                 expandPause();
             }
 
@@ -160,6 +166,10 @@ abstract class MainGame implements Screen {
 
             shapeRenderer.end();
             Gdx.gl.glDisable(GL20.GL_BLEND);
+        }
+
+        if(isGameOver){
+            gameOver.getStage().draw();
         }
 
         pauseMenu.getStage(Gdx.graphics.getDeltaTime()).draw();
@@ -218,7 +228,10 @@ abstract class MainGame implements Screen {
             }
         }
 
-        if(!isHit) gun.triggerLaugh();
+        if(!isHit){
+            gun.triggerLaugh();
+            customFailHit();
+        }
     }
 
     private void drawDucks(){
@@ -230,7 +243,7 @@ abstract class MainGame implements Screen {
     //function for clicks
     private void handleClick(){
         if(handler.wasClicked() && gun.reloadCD >= gun.RELOAD_TIME && shootableArea.contains(mousePos)){
-            if(!isClickable()) return;
+            if(!isClickable() || isGameOver) return;
             customClick();
             detectDuckClick();
             gun.triggerGunShot();
