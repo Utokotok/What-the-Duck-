@@ -30,8 +30,8 @@ public class GameOver {
     public GameOver(GameLauncher game, MainGame currGame){
         this.game = game;
         this.currGame = currGame;
-        tryAgain = Utils.createButton(game.manager.get("Buttons/try_again.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight + 100, 0.28f);
-        quit = Utils.createButton(game.manager.get("Buttons/quit.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight + 100, 0.28f);
+        tryAgain = Utils.createButton(game.manager.get("Buttons/try_again.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight + 100, 0.28f, true);
+        quit = Utils.createButton(game.manager.get("Buttons/quit.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight + 100, 0.28f, true);
         stage = new Stage(game.viewport);
         gameOverText = new Label("GAME OVER", new Label.LabelStyle(game.UIFont1, Color.WHITE));
         gameOverText.setPosition(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f, GameLauncher.gameHeight);

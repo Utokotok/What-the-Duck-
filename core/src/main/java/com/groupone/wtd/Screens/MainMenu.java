@@ -5,17 +5,25 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.Timer;
 import com.groupone.wtd.Assets.AnimationManager;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Input.InputHandler;
@@ -28,15 +36,21 @@ public class MainMenu implements Screen {
     ImageButton numHuntButton;
     ImageButton wordHuntButton;
     ImageButton quitButton;
+    ImageButton aboutButton;
     Sound buttonPressSound;
     Sound buttonHoverSound;
     Stage stage;
     InputMultiplexer inputMultiplexer;
     Animation<TextureRegion> logoFrames;
+    Image logoIntro;
+
     Vector2 gameCenter = new Vector2(0,0);
     Texture bush;
     Texture background;
     float elapsedTime = 0f;
+    float animationDelay = 2f;
+    float logoH;
+    float logoW;
 
     public MainMenu(GameLauncher game){
         this.game = game;
@@ -96,14 +110,14 @@ public class MainMenu implements Screen {
     private void draw(){
         ScreenUtils.clear(Color.BLACK);
         TextureRegion logoFrame = logoFrames.getKeyFrame(elapsedTime);
-        float logoH = logoFrame.getRegionHeight() * 1.4f;
-        float logoW = logoFrame.getRegionWidth() * 1.4f;
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
-        game.batch.draw(background, 0, 0, game.gameWidth, game.gameHeight);
-        game.batch.draw(bush, 0, 0, game.gameWidth, game.gameHeight);
-        game.batch.draw(logoFrame, (gameCenter.x - 20) - logoW / 2f, 375, logoW, logoH);
+        if(GameLauncher.isMainMenuAnimation){
+            game.batch.draw(background, 0, 0, game.gameWidth, game.gameHeight);
+            game.batch.draw(bush, 0, 0, game.gameWidth, game.gameHeight);
+            game.batch.draw(logoFrame, 500, gameCenter.y - logoH / 2f, logoW, logoH);
+        }
         game.batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
@@ -122,15 +136,94 @@ public class MainMenu implements Screen {
             background = game.manager.get("Background/background.png");
             logoFrames = new Animation<>(0.2f, Utils.generateSheet(game.manager.get("Logo/wtd_logo.png"), 6, 1));
             logoFrames.setPlayMode(Animation.PlayMode.LOOP);
+            logoW = logoFrames.getKeyFrame(0).getRegionWidth() * 1.8f;
+            logoH = logoFrames.getKeyFrame(0).getRegionHeight() * 1.8f;
+            logoIntro = new Image(logoFrames.getKeyFrame(0));
+            logoIntro.setSize(logoW, logoH);
+            logoIntro.setPosition(gameCenter.x - logoW / 2f - 20f, 2000);
             initializeButtons();
             AnimationManager.initializeDucks();
         }
     }
 
     private void initializeButtons(){
-        wordHuntButton = Utils.createButton(game.manager.get("Buttons/word_hunt.png"), gameCenter.x, gameCenter.y - 70, 0.2f);
-        numHuntButton = Utils.createButton(game.manager.get("Buttons/num_hunt.png"), gameCenter.x, gameCenter.y - 180, 0.2f);
-        quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), gameCenter.x, gameCenter.y - 290, 0.2f);
+        if(!GameLauncher.isMainMenuAnimation){
+            wordHuntButton = Utils.createButton(game.manager.get("Buttons/word_hunt.png"), 150, 1500, 0.3f, false);
+            numHuntButton = Utils.createButton(game.manager.get("Buttons/num_hunt.png"), 150, 1500, 0.3f, false);
+            aboutButton = Utils.createButton(game.manager.get("Buttons/about.png"), 150, 1500, 0.3f, false);
+            quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), 150, 1500, 0.3f, false);
+
+            logoIntro.addAction(
+                Actions.sequence(
+                    Actions.moveTo(gameCenter.x - logoW / 2f - 20f, gameCenter.y - logoH / 2f, 0.5f, Interpolation.pow2In),
+                    Actions.delay(animationDelay),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            GameLauncher.isMainMenuAnimation = true;
+                            drawFlash();
+                        }
+                    }),
+                    Actions.removeActor()
+                )
+            );
+
+            wordHuntButton.addAction(
+                Actions.sequence(
+                    Actions.delay(animationDelay + 0.75f),
+                    Actions.moveTo(150, 525, 0.2f, Interpolation.pow2In)
+                )
+            );
+            numHuntButton.addAction(
+                Actions.sequence(
+                    Actions.delay(animationDelay + 1f),
+                    Actions.moveTo(150, 375, 0.2f, Interpolation.pow2In)
+                )
+            );
+
+            aboutButton.addAction(
+                Actions.sequence(
+                    Actions.delay(animationDelay + 1.25f),
+                    Actions.moveTo(150, 225, 0.2f, Interpolation.pow2In)
+                )
+            );
+            quitButton.addAction(
+                Actions.sequence(
+                    Actions.delay(animationDelay + 1.50f),
+                    Actions.moveTo(150, 75, 0.2f, Interpolation.pow2In)
+                )
+            );
+        } else{
+            wordHuntButton = Utils.createButton(game.manager.get("Buttons/word_hunt.png"), 150, 2000, 0.3f, false);
+            numHuntButton = Utils.createButton(game.manager.get("Buttons/num_hunt.png"), 150, 2000, 0.3f, false);
+            aboutButton = Utils.createButton(game.manager.get("Buttons/about.png"), 150, 2000, 0.3f, false);
+            quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), 150, 2000, 0.3f, false);
+            wordHuntButton.addAction(
+                Actions.sequence(
+                    Actions.moveTo(150, 525, 0.2f, Interpolation.pow2In)
+                )
+            );
+            numHuntButton.addAction(
+                Actions.sequence(
+                    Actions.delay(0.25f),
+                    Actions.moveTo(150, 375, 0.2f, Interpolation.pow2In)
+                )
+            );
+
+            aboutButton.addAction(
+                Actions.sequence(
+                    Actions.delay(0.50f),
+                    Actions.moveTo(150, 225, 0.2f, Interpolation.pow2In)
+                )
+            );
+            quitButton.addAction(
+                Actions.sequence(
+                    Actions.delay(0.75f),
+                    Actions.moveTo(150, 75, 0.2f, Interpolation.pow2In)
+                )
+            );
+
+        }
 
         numHuntButton.addListener(new ClickListener(){
             @Override
@@ -146,8 +239,27 @@ public class MainMenu implements Screen {
             }
         });
 
+        stage.addActor(logoIntro);
+        stage.addActor(aboutButton);
         stage.addActor(wordHuntButton);
         stage.addActor(numHuntButton);
         stage.addActor(quitButton);
+    }
+
+    private void drawFlash(){
+        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
+        pixmap.setColor(Color.WHITE);
+        pixmap.fill();
+        Image flashOverlay = new Image(new Texture(pixmap));
+        pixmap.dispose();
+        flashOverlay.setSize(GameLauncher.gameWidth, GameLauncher.gameHeight);
+        stage.addActor(flashOverlay);
+        flashOverlay.addAction(
+            Actions.sequence(
+                Actions.alpha(0.9f),
+                Actions.fadeOut(0.25f),
+                Actions.removeActor()
+            )
+        );
     }
 }

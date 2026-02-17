@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Timer;
 import com.groupone.wtd.Entities.Duck;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Utils.Utils;
@@ -26,10 +27,11 @@ public class NumHunt extends MainGame {
     int streak = 1;
     int maxNumber = 10;
     int minNumber = 1;
+    boolean isSpawning = false;
 
     @Override
     protected void customLogic() {
-        if(gun.checkIfOutOfAmmo() || ducks.size == 0 && (currentNumber != numberToGuess)){
+        if(gun.checkIfOutOfAmmo() || ducks.size == 0 && (currentNumber != numberToGuess) && !isSpawning){
             isGameOver = true;
         }
 
@@ -147,9 +149,16 @@ public class NumHunt extends MainGame {
     @Override
     protected void spawnDucks() {
         ducks.clear();
-        for(int i = 0; i < duckNumbers.length; i++){
-            ducks.add(new Duck(game, 300, 500, changeDirectionCD, 0.5f, duckNumbers[i]));
-        }
+        isSpawning = true;
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                for(int i = 0; i < duckNumbers.length; i++){
+                    ducks.add(new Duck(game, 300, 500, changeDirectionCD, 0.5f, duckNumbers[i]));
+                }
+                isSpawning = false;
+            }
+            }, 2f);
     }
 
     @Override

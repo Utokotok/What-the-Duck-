@@ -21,6 +21,7 @@ public class GameLauncher extends Game {
     public static int gameHeight = 720;
     public static int gameWidth = 1280;
     public static final float GROUND_HEIGHT = 140f;
+    public static boolean isMainMenuAnimation = false;
     public BitmapFont numberFont;
     public BitmapFont duckNumberFont;
     public BitmapFont UIFont3;

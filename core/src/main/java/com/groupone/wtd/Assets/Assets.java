@@ -17,6 +17,7 @@ public class Assets {
         manager.load("Buttons/quit.png", Texture.class);
         manager.load("Buttons/continue.png", Texture.class);
         manager.load("Buttons/try_again.png", Texture.class);
+        manager.load("Buttons/about.png", Texture.class);
         manager.load("Buttons/pause.png", Texture.class);
         manager.load("Background/bush.png", Texture.class);
         manager.load("Background/background.png", Texture.class);

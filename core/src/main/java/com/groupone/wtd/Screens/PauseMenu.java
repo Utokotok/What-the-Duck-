@@ -26,9 +26,9 @@ public class PauseMenu {
         this.game = game;
         this.currGame = currGame;
         stage = new Stage(game.viewport);
-        quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), GameLauncher.gameWidth / 2f, (GameLauncher.gameHeight / 2f), QUIT_SCALE);
-        pauseButton = Utils.createButton(game.manager.get("Buttons/pause.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight / 2f, PAUSE_SCALE);
-        continueButton = Utils.createButton(game.manager.get("Buttons/continue.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight / 2f, CONTINUE_SCALE);
+        quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), GameLauncher.gameWidth / 2f, (GameLauncher.gameHeight / 2f), QUIT_SCALE, true);
+        pauseButton = Utils.createButton(game.manager.get("Buttons/pause.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight / 2f, PAUSE_SCALE, true);
+        continueButton = Utils.createButton(game.manager.get("Buttons/continue.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight / 2f, CONTINUE_SCALE, true);
         pauseButton.setPosition(GameLauncher.gameWidth - (pauseButton.getWidth() * PAUSE_SCALE + 10), 10);
         continueButton.setPosition(GameLauncher.gameWidth / 2f - ((continueButton.getWidth() * QUIT_SCALE) / 2f), (GameLauncher.gameHeight / 2f) - 10);
         quitButton.setPosition(GameLauncher.gameWidth / 2f - (quitButton.getWidth() * QUIT_SCALE) / 2f, (GameLauncher.gameHeight / 2f) - quitButton.getHeight() * QUIT_SCALE - 30);

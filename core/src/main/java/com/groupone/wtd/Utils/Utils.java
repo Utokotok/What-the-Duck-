@@ -46,7 +46,7 @@ public class Utils {
         return value > 0 ? "+" + String.format("%04d", Math.abs(value)) : "-" + String.format("%04d", Math.abs(value));
     }
 
-    public static ImageButton createButton(Texture texture, float x, float y, float scale){
+    public static ImageButton createButton(Texture texture, float x, float y, float scale, boolean isCentered){
         ImageButton.ImageButtonStyle style = new ImageButton.ImageButtonStyle();
         style.up = new TextureRegionDrawable(texture);
         style.down = new TextureRegionDrawable(texture).tint(Color.GRAY);
@@ -55,8 +55,8 @@ public class Utils {
         ImageButton button = new ImageButton(style);
         button.setTransform(true);
         button.setScale(scale);
-        float posX = x - (button.getWidth() * scale / 2f);
-        float posY = y - (button.getHeight() * scale / 2f);
+        float posX = isCentered ? x - (button.getWidth() * scale / 2f) : x;
+        float posY = isCentered ? y - (button.getHeight() * scale / 2f) : y;
 
         button.addListener(new ClickListener(){
             @Override
