@@ -38,7 +38,7 @@ public class NumHunt extends MainGame {
             maxNumber = Math.min(maxNumber + 5, 20);
             minNumber = Math.min(minNumber + 2, 10);
             currentNumber = 0;
-            points +=  baseScore / shots;
+            points += (int) ((baseScore / shots) + (baseScore / shots) * (streak /  10f));
             shots = 0;
             generateRandomEquation(1, 10);
             gun.reloadGun();
@@ -179,9 +179,10 @@ public class NumHunt extends MainGame {
             }
 
             int counter = 0;
-            number = randomNumbers[counter];
+
             counter++;
             for(int i = 0; i < randomOperators.size; i++){
+                System.out.println(number);
                 if(randomOperators.get(i) == 3){
                     if(number % randomNumbers[counter] == 0){
                         number = calculate(number, randomNumbers[counter], operators[randomOperators.get(i)]);
@@ -199,7 +200,7 @@ public class NumHunt extends MainGame {
                 counter++;
             }
         } while(number == 0);
-
+        System.out.println(number);
         numberToGuess = number;
         duckNumbers = randomNumbers;
         System.out.println(Arrays.toString(duckNumbers));
