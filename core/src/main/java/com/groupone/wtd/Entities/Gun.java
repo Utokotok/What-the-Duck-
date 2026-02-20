@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Timer;
+import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Utils.Utils;
 
@@ -90,6 +91,7 @@ public class Gun {
     }
 
     public void triggerGunShot(){
+        SoundManager.playGunShot();
         currentGun = shotFrames;
         currentGun.setPlayMode(Animation.PlayMode.NORMAL);
         reloadCD = 0f;
@@ -100,6 +102,7 @@ public class Gun {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
+                SoundManager.playGunCry();
                 currentGun = cryFrames;
                 currentGun.setPlayMode(Animation.PlayMode.LOOP);
             }
@@ -110,6 +113,7 @@ public class Gun {
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
+                SoundManager.playGunLaugh();
                 currentGun = laughFrames;
                 currentGun.setPlayMode(Animation.PlayMode.LOOP);
             }
@@ -127,6 +131,7 @@ public class Gun {
     }
 
     public void changeMode(int mode){
+        SoundManager.playSwitch();
         gunModeState = 0f;
         gunMode = mode;
     }

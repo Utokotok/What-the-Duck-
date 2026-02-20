@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.GameLauncher;
 
 public class Utils {
@@ -60,15 +61,8 @@ public class Utils {
 
         button.addListener(new ClickListener(){
             @Override
-            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
-                if(pointer == -1) {
-
-                }
-            }
-
-            @Override
             public void clicked(InputEvent event, float x, float y){
-
+                SoundManager.playClick();
             }
         });
         button.setPosition(posX, posY);

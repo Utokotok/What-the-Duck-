@@ -1,11 +1,14 @@
 package com.groupone.wtd.Screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.InputListener;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Utils.Utils;
 
@@ -56,22 +59,38 @@ public class PauseMenu {
             public void clicked(InputEvent event, float x, float y){
                 isExpanded = false;
             }
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
+                if (pointer == -1) {
+                    SoundManager.playContinue();
+                }
+            }
         });
         quitButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y){
                 game.setScreen(new MainMenu(game));
             }
+
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
+                if (pointer == -1) {
+                    SoundManager.playQuit();
+                }
+            }
         });
         stage.addActor(continueButton);
         stage.addActor(quitButton);
     }
 
-    public Stage getStage(float delta){
+    public void update(){
         pauseButton.setVisible(!isExpanded);
         continueButton.setVisible(isExpanded);
         quitButton.setVisible(isExpanded);
-        stage.act(delta);
+    }
+
+    public Stage getStage(){
+        stage.act(Gdx.graphics.getDeltaTime());
         return stage;
     }
 

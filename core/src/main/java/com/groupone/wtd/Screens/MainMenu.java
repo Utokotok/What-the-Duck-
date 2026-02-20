@@ -13,10 +13,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.scenes.scene2d.Actor;
-import com.badlogic.gdx.scenes.scene2d.InputEvent;
-import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
@@ -25,6 +22,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Timer;
 import com.groupone.wtd.Assets.AnimationManager;
+import com.groupone.wtd.Assets.Assets;
+import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Input.InputHandler;
 import com.groupone.wtd.Utils.Utils;
@@ -107,6 +106,16 @@ public class MainMenu implements Screen {
 
     }
 
+    private void playBackgroundMusic(){
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                SoundManager.setMainMenu();
+                SoundManager.playBackgroundMusic();
+            }
+        }, GameLauncher.isMainMenuAnimation ? 0f : animationDelay + 1f);
+    }
+
     private void draw(){
         ScreenUtils.clear(Color.BLACK);
         TextureRegion logoFrame = logoFrames.getKeyFrame(elapsedTime);
@@ -114,8 +123,8 @@ public class MainMenu implements Screen {
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
         game.batch.begin();
         if(GameLauncher.isMainMenuAnimation){
-            game.batch.draw(background, 0, 0, game.gameWidth, game.gameHeight);
-            game.batch.draw(bush, 0, 0, game.gameWidth, game.gameHeight);
+            game.batch.draw(background, 0, 0, GameLauncher.gameWidth, GameLauncher.gameHeight);
+            game.batch.draw(bush, 0, 0, GameLauncher.gameWidth, GameLauncher.gameHeight);
             game.batch.draw(logoFrame, 500, gameCenter.y - logoH / 2f, logoW, logoH);
         }
         game.batch.end();
@@ -130,8 +139,6 @@ public class MainMenu implements Screen {
     private void loadAssets(){
         if(game.manager.update()){
             isAssetsLoading = false;
-            buttonHoverSound = game.manager.get("Sounds/button_hover.mp3");
-            buttonPressSound = game.manager.get("Sounds/button_press.mp3");
             bush = game.manager.get("Background/bush.png");
             background = game.manager.get("Background/background.png");
             logoFrames = new Animation<>(0.2f, Utils.generateSheet(game.manager.get("Logo/wtd_logo.png"), 6, 1));
@@ -143,19 +150,67 @@ public class MainMenu implements Screen {
             logoIntro.setPosition(gameCenter.x - logoW / 2f - 20f, 2000);
             initializeButtons();
             AnimationManager.initializeDucks();
+            SoundManager.initializeSound(game);
+            playBackgroundMusic();
         }
     }
 
-    private void initializeButtons(){
-        if(!GameLauncher.isMainMenuAnimation){
-            wordHuntButton = Utils.createButton(game.manager.get("Buttons/word_hunt.png"), 150, 1500, 0.3f, false);
-            numHuntButton = Utils.createButton(game.manager.get("Buttons/num_hunt.png"), 150, 1500, 0.3f, false);
-            aboutButton = Utils.createButton(game.manager.get("Buttons/about.png"), 150, 1500, 0.3f, false);
-            quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), 150, 1500, 0.3f, false);
+    private void drawFlash(){
+        stage.addActor(Assets.getFlash());
+    }
 
+    private void initializeButtons(){
+        wordHuntButton = Utils.createButton(game.manager.get("Buttons/word_hunt.png"), 150, 1500, 0.3f, false);
+        numHuntButton = Utils.createButton(game.manager.get("Buttons/num_hunt.png"), 150, 1500, 0.3f, false);
+        aboutButton = Utils.createButton(game.manager.get("Buttons/about.png"), 150, 1500, 0.3f, false);
+        quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), 150, 1500, 0.3f, false);
+
+        wordHuntButton.addListener(new ClickListener(){
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
+                if (pointer == -1) {
+                    SoundManager.playWordHunt();
+                }
+            }
+        });
+
+        numHuntButton.addListener(new ClickListener(){
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
+                if (pointer == -1) {
+                    SoundManager.playNumHunt();
+                }
+            }
+        });
+
+        aboutButton.addListener(new ClickListener(){
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
+                if (pointer == -1) {
+                    SoundManager.playAbout();
+                }
+            }
+        });
+
+        quitButton.addListener(new ClickListener(){
+            @Override
+            public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
+                if (pointer == -1) {
+                    SoundManager.playQuit();
+                }
+            }
+        });
+
+        if(!GameLauncher.isMainMenuAnimation){
             logoIntro.addAction(
                 Actions.sequence(
-                    Actions.moveTo(gameCenter.x - logoW / 2f - 20f, gameCenter.y - logoH / 2f, 0.5f, Interpolation.pow2In),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            SoundManager.playLogo();
+                        }
+                    }),
+                    Actions.moveTo(gameCenter.x - logoW / 2f - 20f, gameCenter.y - logoH / 2f, 0.8f, Interpolation.bounceOut),
                     Actions.delay(animationDelay),
                     Actions.run(new Runnable() {
                         @Override
@@ -194,10 +249,6 @@ public class MainMenu implements Screen {
                 )
             );
         } else{
-            wordHuntButton = Utils.createButton(game.manager.get("Buttons/word_hunt.png"), 150, 2000, 0.3f, false);
-            numHuntButton = Utils.createButton(game.manager.get("Buttons/num_hunt.png"), 150, 2000, 0.3f, false);
-            aboutButton = Utils.createButton(game.manager.get("Buttons/about.png"), 150, 2000, 0.3f, false);
-            quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), 150, 2000, 0.3f, false);
             wordHuntButton.addAction(
                 Actions.sequence(
                     Actions.moveTo(150, 525, 0.2f, Interpolation.pow2In)
@@ -229,6 +280,7 @@ public class MainMenu implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y){
                 game.setScreen(new NumHunt(game));
+                SoundManager.stopBackgroundMusic();
             }
         });
 
@@ -244,22 +296,5 @@ public class MainMenu implements Screen {
         stage.addActor(wordHuntButton);
         stage.addActor(numHuntButton);
         stage.addActor(quitButton);
-    }
-
-    private void drawFlash(){
-        Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
-        pixmap.setColor(Color.WHITE);
-        pixmap.fill();
-        Image flashOverlay = new Image(new Texture(pixmap));
-        pixmap.dispose();
-        flashOverlay.setSize(GameLauncher.gameWidth, GameLauncher.gameHeight);
-        stage.addActor(flashOverlay);
-        flashOverlay.addAction(
-            Actions.sequence(
-                Actions.alpha(0.9f),
-                Actions.fadeOut(0.25f),
-                Actions.removeActor()
-            )
-        );
     }
 }

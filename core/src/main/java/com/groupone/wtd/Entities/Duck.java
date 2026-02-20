@@ -10,6 +10,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
 import com.groupone.wtd.Assets.AnimationManager;
+import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Utils.Utils;
 
@@ -118,6 +119,7 @@ public class Duck {
         velocity.x = 0;
         velocity.y = 0;
         currentFrame = shockFrames;
+        SoundManager.playDuckFall();
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {

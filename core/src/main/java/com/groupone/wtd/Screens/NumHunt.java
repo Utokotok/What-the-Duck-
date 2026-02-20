@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Timer;
+import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.Entities.Duck;
 import com.groupone.wtd.GameLauncher;
 import com.groupone.wtd.Utils.Utils;
@@ -164,6 +165,7 @@ public class NumHunt extends MainGame {
     @Override
     protected void customDuckHit(Duck duck) {
         streak++;
+        SoundManager.playOperation(gun.gunMode, duck.getNumber());
         switch (gun.gunMode){
             case 1 -> {currentNumber += duck.getNumber();}
             case 2 -> {currentNumber -= duck.getNumber();}
