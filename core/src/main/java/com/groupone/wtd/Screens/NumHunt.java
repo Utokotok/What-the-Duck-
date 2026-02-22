@@ -32,6 +32,8 @@ public class NumHunt extends MainGame {
 
     @Override
     protected void customLogic() {
+        if(isGameOver) return;
+
         if(gun.checkIfOutOfAmmo() || ducks.size == 0 && (currentNumber != numberToGuess) && !isSpawning){
             isGameOver = true;
         }
@@ -165,7 +167,6 @@ public class NumHunt extends MainGame {
     @Override
     protected void customDuckHit(Duck duck) {
         streak++;
-        SoundManager.playOperation(gun.gunMode, duck.getNumber());
         switch (gun.gunMode){
             case 1 -> {currentNumber += duck.getNumber();}
             case 2 -> {currentNumber -= duck.getNumber();}

@@ -218,6 +218,7 @@ abstract class MainGame implements Screen {
         boolean isHit = false;
         for(Duck duck : ducks){
             if(duck.getHitBox().contains(mousePos)){
+                SoundManager.playApplause();
                 customDuckHit(duck);
                 gun.triggerCry();
                 duck.handleShot();
@@ -226,6 +227,7 @@ abstract class MainGame implements Screen {
         }
 
         if(!isHit){
+            SoundManager.playDisappoint();
             gun.triggerLaugh();
             customFailHit();
         }

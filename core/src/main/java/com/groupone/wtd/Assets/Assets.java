@@ -61,6 +61,7 @@ public class Assets {
         manager.load("Sounds/Buttons/continue.mp3", Sound.class);
         manager.load("Sounds/Buttons/num_hunt.mp3", Sound.class);
         manager.load("Sounds/Buttons/word_hunt.mp3", Sound.class);
+        manager.load("Sounds/Buttons/play_again.mp3", Sound.class);
         manager.load("Sounds/Buttons/about.mp3", Sound.class);
         manager.load("Sounds/Buttons/click.mp3", Sound.class);
         manager.load("Sounds/Guns/reload.mp3", Sound.class);
@@ -70,7 +71,16 @@ public class Assets {
         manager.load("Sounds/Guns/divide.mp3", Sound.class);
         manager.load("Sounds/Guns/plus.mp3", Sound.class);
         manager.load("Sounds/Buttons/logo.mp3", Sound.class);
+        manager.load("Sounds/GameOver/game_over.mp3", Sound.class);
+        manager.load("Sounds/GameOver/wonk.mp3", Sound.class);
         manager.load("Sounds/Background/main_menu.mp3", Music.class);
+
+        for(int i = 1; i <= 11; i++){
+            manager.load("Sounds/Applause/" + i + ".mp3", Sound.class);
+            if(i > 9) continue;
+            manager.load("Sounds/Disappoint/" + i + ".mp3", Sound.class);
+        }
+
         for(int i = 0; i < 10; i++){
             manager.load("Sounds/alphanumerics/" + (i + 1) + ".mp3", Sound.class);
         }
@@ -91,6 +101,7 @@ public class Assets {
             manager.load("Sounds/Ducks/fall_" + i +".mp3", Sound.class);
             manager.load("Sounds/Guns/laugh_" + i +".mp3", Sound.class);
             manager.load("Sounds/Guns/cry_" + i +".mp3", Sound.class);
+            manager.load("Sounds/GameOver/" + i + ".mp3", Sound.class);
         }
 
     }

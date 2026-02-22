@@ -31,6 +31,7 @@ import com.groupone.wtd.Utils.Utils;
 public class MainMenu implements Screen {
 
     boolean isAssetsLoading = true;
+    boolean isAnimationDone = false;
     GameLauncher game;
     ImageButton numHuntButton;
     ImageButton wordHuntButton;
@@ -168,7 +169,7 @@ public class MainMenu implements Screen {
         wordHuntButton.addListener(new ClickListener(){
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
-                if (pointer == -1) {
+                if (pointer == -1 && isAnimationDone) {
                     SoundManager.playWordHunt();
                 }
             }
@@ -177,7 +178,7 @@ public class MainMenu implements Screen {
         numHuntButton.addListener(new ClickListener(){
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
-                if (pointer == -1) {
+                if (pointer == -1 && isAnimationDone) {
                     SoundManager.playNumHunt();
                 }
             }
@@ -186,7 +187,7 @@ public class MainMenu implements Screen {
         aboutButton.addListener(new ClickListener(){
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
-                if (pointer == -1) {
+                if (pointer == -1 && isAnimationDone) {
                     SoundManager.playAbout();
                 }
             }
@@ -195,7 +196,7 @@ public class MainMenu implements Screen {
         quitButton.addListener(new ClickListener(){
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
-                if (pointer == -1) {
+                if (pointer == -1 && isAnimationDone) {
                     SoundManager.playQuit();
                 }
             }
@@ -245,7 +246,13 @@ public class MainMenu implements Screen {
             quitButton.addAction(
                 Actions.sequence(
                     Actions.delay(animationDelay + 1.50f),
-                    Actions.moveTo(150, 75, 0.2f, Interpolation.pow2In)
+                    Actions.moveTo(150, 75, 0.2f, Interpolation.pow2In),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            isAnimationDone = true;
+                        }
+                    })
                 )
             );
         } else{
@@ -270,7 +277,13 @@ public class MainMenu implements Screen {
             quitButton.addAction(
                 Actions.sequence(
                     Actions.delay(0.75f),
-                    Actions.moveTo(150, 75, 0.2f, Interpolation.pow2In)
+                    Actions.moveTo(150, 75, 0.2f, Interpolation.pow2In),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            isAnimationDone = true;
+                        }
+                    })
                 )
             );
 
