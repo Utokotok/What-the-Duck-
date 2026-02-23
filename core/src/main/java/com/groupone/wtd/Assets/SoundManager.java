@@ -8,9 +8,9 @@ import com.groupone.wtd.GameLauncher;
 
 public class SoundManager {
     private static Sound gunShoot;
-    private static float voiceVolume = 1f;
-    private static float gunVolume = 0.5f;
-    private static float duckVolume = 0.3f;
+    private static float voiceVolume = 0.2f;
+    private static float gunVolume = 1f;
+    private static float duckVolume = 1f;
     private static long backgroundID;
     private static float backgroundVolume = 1f;
 
@@ -23,6 +23,7 @@ public class SoundManager {
     private static final Sound[] operators = new Sound[4];
     private static final Sound[] gameOverAdd = new Sound[3];
     private static Sound gameOver;
+    private static Sound blox;
     private static Sound wonk;
     private static Sound quit;
     private static Sound numHunt;
@@ -54,6 +55,7 @@ public class SoundManager {
         mainMenu = game.manager.get("Sounds/Background/main_menu.mp3");
         gameOver = game.manager.get("Sounds/GameOver/game_over.mp3");
         wonk = game.manager.get("Sounds/GameOver/wonk.mp3");
+        blox = game.manager.get("Sounds/Buttons/main_menu_blox.mp3");
         operators[0] = game.manager.get("Sounds/Guns/plus.mp3");
         operators[1] = game.manager.get("Sounds/Guns/minus.mp3");
         operators[2] = game.manager.get("Sounds/Guns/times.mp3");
@@ -65,8 +67,9 @@ public class SoundManager {
 
         for(int i = 0; i < 11; i++){
             applause[i] = game.manager.get("Sounds/Applause/" + (i + 1) + ".mp3");
-            if(i > 8) continue;
-            disappoint[i] = game.manager.get("Sounds/Disappoint/" + (i + 1) + ".mp3");
+            if(i < 9){
+                disappoint[i] = game.manager.get("Sounds/Disappoint/" + (i + 1) + ".mp3");
+            }
         }
 
         for(int i = 1; i <= 3; i++){
@@ -93,7 +96,7 @@ public class SoundManager {
 
     public static void playLogo(){
         long id = logo.play();
-        logo.setVolume(id, voiceVolume);
+        logo.setVolume(id, voiceVolume * 5f);
     }
 
 
@@ -102,6 +105,11 @@ public class SoundManager {
         int random = MathUtils.random(0, 10);
         long id = applause[random].play();
         applause[random].setVolume(id, voiceVolume);
+    }
+
+    public static void playBlox(){
+        long id = blox.play();
+        blox.setVolume(id, voiceVolume);
     }
 
     public static void playDisappoint(){
@@ -117,9 +125,9 @@ public class SoundManager {
 
     public static void playGameOver(){
         long gameOverID = gameOver.play();
-        gameOver.setVolume(gameOverID, voiceVolume);
+        gameOver.setVolume(gameOverID, voiceVolume * 2);
         long wonkID = wonk.play();
-        wonk.setVolume(wonkID, voiceVolume - 0.5f);
+        wonk.setVolume(wonkID, voiceVolume + 0.8f);
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {
@@ -157,7 +165,7 @@ public class SoundManager {
 
     public static void playClick() {
         long id = click.play();
-        click.setVolume(id, voiceVolume);
+        click.setVolume(id, voiceVolume * 5f);
     }
 
     //Gun

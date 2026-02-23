@@ -74,6 +74,7 @@ public class Assets {
         manager.load("Sounds/GameOver/game_over.mp3", Sound.class);
         manager.load("Sounds/GameOver/wonk.mp3", Sound.class);
         manager.load("Sounds/Background/main_menu.mp3", Music.class);
+        manager.load("Sounds/Buttons/main_menu_blox.mp3", Sound.class);
 
         for(int i = 1; i <= 11; i++){
             manager.load("Sounds/Applause/" + i + ".mp3", Sound.class);

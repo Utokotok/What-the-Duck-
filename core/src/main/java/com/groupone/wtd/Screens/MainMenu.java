@@ -113,8 +113,9 @@ public class MainMenu implements Screen {
             public void run() {
                 SoundManager.setMainMenu();
                 SoundManager.playBackgroundMusic();
+                SoundManager.playBlox();
             }
-        }, GameLauncher.isMainMenuAnimation ? 0f : animationDelay + 1f);
+        }, GameLauncher.isMainMenuAnimation ? 0f : animationDelay + 0.8f);
     }
 
     private void draw(){
