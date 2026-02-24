@@ -52,7 +52,7 @@ public class SoundManager {
         reload = game.manager.get("Sounds/Guns/reload.mp3");
         logo = game.manager.get("Sounds/Buttons/logo.mp3");
         switchGun = game.manager.get("Sounds/Guns/switch.mp3");
-        mainMenu = game.manager.get("Sounds/Background/main_menu.mp3");
+        mainMenu = game.manager.get("Sounds/Background/main_menu.wav");
         gameOver = game.manager.get("Sounds/GameOver/game_over.mp3");
         wonk = game.manager.get("Sounds/GameOver/wonk.mp3");
         blox = game.manager.get("Sounds/Buttons/main_menu_blox.mp3");
@@ -87,6 +87,7 @@ public class SoundManager {
 
     public static void playBackgroundMusic(){
         backgroundMusic.play();
+        backgroundMusic.setVolume(backgroundVolume);
     }
 
     public static void setMainMenu(){
