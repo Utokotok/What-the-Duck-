@@ -127,8 +127,13 @@ public class SoundManager {
     public static void playGameOver(){
         long gameOverID = gameOver.play();
         gameOver.setVolume(gameOverID, voiceVolume * 2);
-        long wonkID = wonk.play();
-        wonk.setVolume(wonkID, voiceVolume + 0.8f);
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                long wonkID = wonk.play();
+                wonk.setVolume(wonkID, voiceVolume + 0.8f);
+            }
+        }, 1f);
         Timer.schedule(new Timer.Task() {
             @Override
             public void run() {

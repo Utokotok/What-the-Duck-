@@ -12,6 +12,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Align;
+import com.groupone.wtd.Assets.Assets;
 import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.GameLauncher;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -21,8 +22,15 @@ public class GameOver {
     Stage stage;
     GameLauncher game;
     MainGame currGame;
+    String[][] reasons = {
+        {"The ducks outlasted your ammo.", "Should've aimed first.", "You shot all! The ducks are fine.", "Reloading... wait what!?", "Who taught ducks to dodge!?"},
+        {"Where are the ducks?", "The ducks has left the chat.", "No ducks. Well done.", "Ducks saw you and left.", "You cleared the pond."},
+        {"Donald got no more time for you.", "Check bottom-left next \"time\".", "My grandpa aims faster.", "Clocks don't walk, y'know!", "Think fast unc!"}
+    };
+    String reason = "How'd that happen!?";
     boolean isGameOver = false;
     float stateTime = 0f;
+    float animationDelay = 1f;
     Label gameOverText;
     Label pointsText;
     ImageButton tryAgain;
@@ -36,29 +44,42 @@ public class GameOver {
         tryAgain = Utils.createButton(game.manager.get("Buttons/try_again.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight + 100, 0.28f, true);
         quit = Utils.createButton(game.manager.get("Buttons/quit.png"), GameLauncher.gameWidth / 2f, GameLauncher.gameHeight + 100, 0.28f, true);
         stage = new Stage(game.viewport);
-        gameOverText = new Label("GAME OVER", new Label.LabelStyle(game.UIFont1, Color.WHITE));
-        gameOverText.setPosition(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f, GameLauncher.gameHeight);
-        gameOverText.addAction(Actions.moveTo(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f, GameLauncher.gameHeight / 2f - gameOverText.getHeight() / 2f + 150, 0.5f, Interpolation.bounceOut));
+        gameOverText = new Label(reason, new Label.LabelStyle(game.UIFont1, Color.WHITE));
         pointsText = new Label("Your scored " + currGame.points + " points!", new Label.LabelStyle(game.UIFont2, Color.WHITE));
         pointsText.setWidth(GameLauncher.gameWidth);
         pointsText.setAlignment(Align.center);
+        gameOverText.setWidth(GameLauncher.gameWidth);
+        gameOverText.setAlignment(Align.center);
+        gameOverText.setPosition(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f, GameLauncher.gameHeight);
         pointsText.setPosition(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, GameLauncher.gameHeight + 100);
+        stage.addActor(Assets.getFlash());
+        gameOverText.addAction(Actions.sequence(
+            Actions.delay(animationDelay),
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    stage.addActor(Assets.getFlash());
+                }
+            }),
+            Actions.moveTo(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f, GameLauncher.gameHeight / 2f - gameOverText.getHeight() / 2f + 150, 0.5f, Interpolation.bounceOut)
+        ));
         pointsText.addAction(Actions.sequence(
+            Actions.delay(animationDelay),
             Actions.run(new Runnable() {
                 @Override
                 public void run() {
                     SoundManager.playGameOver();
                 }
             }),
-            Actions.delay(0.25f),
+            Actions.delay(animationDelay),
             Actions.moveTo(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, 390, 1f, Interpolation.bounceOut)
         ));
         tryAgain.addAction(Actions.sequence(
-            Actions.delay(1.5f),
+            Actions.delay(animationDelay + 2.5f),
             Actions.moveTo(tryAgain.getX(),  250, 0.25f, Interpolation.bounceOut)
         ));
         quit.addAction(Actions.sequence(
-            Actions.delay(1.75f),
+            Actions.delay(animationDelay + 2.75f),
             Actions.moveTo(quit.getX(),  110, 0.25f, Interpolation.bounceOut),
             Actions.run(new Runnable() {
                 @Override
@@ -100,13 +121,18 @@ public class GameOver {
         stage.addActor(pointsText);
     }
 
+    public void setReason(int reason){
+        this.reason = reasons[reason][MathUtils.random(0, 4)];
+        gameOverText.setText(this.reason);
+    }
+
     public void updateGameOver(float delta){
         stateTime += Gdx.graphics.getDeltaTime();
         stage.act(delta);
     }
 
     public Stage getStage(){
-        pointsText.setText("Your scored " + currGame.points + " points!");
+        pointsText.setText("You scored " + currGame.points + " points!");
         return stage;
     }
 

@@ -81,8 +81,8 @@ public class Duck {
     }
 
     public void setMinMaxVelocity(int streak){
-        maxSpeed = Math.min(baseMaxSpeed + streak * 100, 1000);
-        minSpeed = Math.min(baseMinSpeed + streak * 100, 500);
+        maxSpeed = Math.min(baseMaxSpeed + streak * 50, 1000);
+        minSpeed = Math.min(baseMinSpeed + streak * 50, 500);
     }
 
     public Duck(GameLauncher game, float minSpeed, float maxSpeed, float changeDirectionCD, float changeDirectionChance, char letter){
