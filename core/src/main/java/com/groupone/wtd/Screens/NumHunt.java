@@ -21,6 +21,7 @@ public class NumHunt extends MainGame {
     int currentNumber = 0;
     int numberToGuess;
     int[] duckNumbers;
+    int duckSpawnSize = 6;
     int shots = 0;
     int baseScore = 200;
     float changeDirectionCD = 1.2f;
@@ -34,17 +35,24 @@ public class NumHunt extends MainGame {
     protected void customLogic() {
         if(isGameOver) return;
 
-        if(gun.checkIfOutOfAmmo() || ducks.size == 0 && (currentNumber != numberToGuess) && !isSpawning){
+        if(gun.checkIfOutOfAmmo()){
             isGameOver = true;
+            gameOver.setReason(0);
+        } else if(ducks.size == 0 && (currentNumber != numberToGuess) && !isSpawning){
+            isGameOver = true;
+            gameOver.setReason(1);
+        } else if(timeRemaining <= 0f){
+            isGameOver = true;
+            gameOver.setReason(2);
         }
 
         if(currentNumber == numberToGuess){
             level++;
-            maxNumber = Math.min(maxNumber + 5, 20);
-            minNumber = Math.min(minNumber + 2, 10);
+            timeRemaining += Math.max(10f, 20 - level * 2f);
             currentNumber = 0;
             points += (int) ((baseScore / shots) + (baseScore / shots) * (streak /  10f));
             shots = 0;
+            duckSpawnSize = Math.max(level % 5 == 0 ? duckSpawnSize - 1 : duckSpawnSize, 4);
             generateRandomEquation(1, 10);
             gun.reloadGun();
             spawnDucks();
@@ -100,19 +108,10 @@ public class NumHunt extends MainGame {
 
     @Override
     protected void customShape() {
-        Gdx.gl.glEnable(GL20.GL_BLEND);
-        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
-        shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
-        shapeRenderer.setColor(Color.BLACK);
-        shapeRenderer.setColor(0,0,0, 0.5f);
         drawRoundedRect(20, 10, 180, 90, 10);
         drawRoundedRect(210, 10, 180, 90, 10);
         drawRoundedRect(GameLauncher.gameWidth - 250, 10, 230, 90, 10);
         drawRoundedRect(GameLauncher.gameWidth - 380, 10, 120, 90, 10);
-        shapeRenderer.end();
-        Gdx.gl.glDisable(GL20.GL_BLEND);
-        customText();
     }
 
     @Override
@@ -120,18 +119,8 @@ public class NumHunt extends MainGame {
         streak = 1;
     }
 
-    private void drawRoundedRect(float x, float y, float width, float height, float radius) {
-        shapeRenderer.rect(x + radius, y, width - (2 * radius), height);
-        shapeRenderer.rect(x, y + radius, radius, height - (2 * radius));
-        shapeRenderer.rect(x + width - radius, y + radius, radius, height - (2 * radius));
-        shapeRenderer.arc(x + radius, y + radius, radius, 180f, 90f); // BL
-        shapeRenderer.arc(x + width - radius, y + radius, radius, 270f, 90f); // BR
-        shapeRenderer.arc(x + width - radius, y + height - radius, radius, 0f, 90f); // TR
-        shapeRenderer.arc(x + radius, y + height - radius, radius, 90f, 90f); // TL
-    }
-
+    @Override
     protected void customText() {
-        game.batch.begin();
         game.UIFont3.draw(game.batch, "GIVEN", 70, 88);
         game.numberFont.draw(game.batch, Utils.padNumber(numberToGuess), 35, 63);
         game.UIFont3.draw(game.batch, "CURRENT", 250, 88);
@@ -140,7 +129,6 @@ public class NumHunt extends MainGame {
         game.numberFont.draw(game.batch, String.format("%07d", points), GameLauncher.gameWidth - 235, 63);
         game.UIFont3.draw(game.batch, "AMMO", GameLauncher.gameWidth - 352, 88);
         game.numberFont.draw(game.batch, gun.availableGunMode[gun.gunMode - 1] + "/5", GameLauncher.gameWidth - 360, 63);
-        game.batch.end();
     }
 
     public NumHunt(GameLauncher game) {
@@ -181,10 +169,10 @@ public class NumHunt extends MainGame {
         do{
             Array<Integer> randomOperators = new Array<>();
             randomOperators.addAll(0, 1, 2, 3);
-            randomOperators.shuffle();
+            Utils.shuffleArray(randomOperators);
             randomOperators.truncate(3);
             String[] operators = {"+", "-", "*", "/"};
-            randomNumbers = new int[4];
+            randomNumbers = new int[duckSpawnSize];
 
             for(int i = 0; i < randomNumbers.length; i++){
                 randomNumbers[i] = MathUtils.random(startRange, endRange);

@@ -36,6 +36,7 @@ abstract class MainGame implements Screen {
     private Rectangle shootableArea;
     boolean isGameOver = false;
     int points = 0;
+    float timeRemaining = 25f;
     PauseMenu pauseMenu;
     Gun gun;
     Egg egg;
@@ -59,6 +60,7 @@ abstract class MainGame implements Screen {
     protected abstract void customClick();
     protected abstract boolean isClickable();
     protected abstract void customShape();
+    protected abstract void customText();
     protected abstract void customFailHit();
 
     public MainGame(GameLauncher game){
@@ -95,12 +97,16 @@ abstract class MainGame implements Screen {
     private void logic(){
         pauseMenu.update();
         if(pauseMenu.isExpanded) return;
-        if(isGameOver) gameOver.updateGameOver(Gdx.graphics.getDeltaTime());
+        flashStage.act(Gdx.graphics.getDeltaTime());
+        if(isGameOver){
+            gameOver.updateGameOver(Gdx.graphics.getDeltaTime());
+            return;
+        }
+        timeRemaining = Math.max(timeRemaining - Gdx.graphics.getDeltaTime(), 0);
         //randomly spawn clouds
 //        spawnClouds();
         //update cloud, duck, gun
 //        updateClouds();
-        flashStage.act(Gdx.graphics.getDeltaTime());
         updateDucks();
         customLogic();
         gun.updateState();
@@ -138,6 +144,27 @@ abstract class MainGame implements Screen {
         game.batch.draw(background, 0, 0, GameLauncher.gameWidth, GameLauncher.gameHeight);
     }
 
+    private void drawShape(){
+        Gdx.gl.glEnable(GL20.GL_BLEND);
+        Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
+        shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
+        shapeRenderer.setColor(Color.BLACK);
+        shapeRenderer.setColor(0,0,0, 0.5f);
+        drawRoundedRect(20, 110, 200, 90, 10);
+        customShape();
+        shapeRenderer.end();
+        Gdx.gl.glDisable(GL20.GL_BLEND);
+    }
+
+    private void drawText(){
+        game.batch.begin();
+        game.UIFont3.draw(game.batch, "TIME REMAINING", 35, 188);
+        game.numberFont.draw(game.batch, String.format("%05.2f", timeRemaining), 60, 163);
+        customText();
+        game.batch.end();
+    }
+
     private void draw(){
         //setup initialization
         ScreenUtils.clear(Color.BLACK);
@@ -149,7 +176,8 @@ abstract class MainGame implements Screen {
         drawMidGround();
         drawForeground();
         game.batch.end();
-        customShape();
+        drawShape();
+        drawText();
 
         if(pauseMenu.isExpanded ||  isGameOver){
             Gdx.gl.glEnable(GL20.GL_BLEND);
@@ -255,6 +283,17 @@ abstract class MainGame implements Screen {
             egg.triggerEgg(mousePos.x, mousePos.y);
         }
     }
+
+    void drawRoundedRect(float x, float y, float width, float height, float radius) {
+        shapeRenderer.rect(x + radius, y, width - (2 * radius), height);
+        shapeRenderer.rect(x, y + radius, radius, height - (2 * radius));
+        shapeRenderer.rect(x + width - radius, y + radius, radius, height - (2 * radius));
+        shapeRenderer.arc(x + radius, y + radius, radius, 180f, 90f); // BL
+        shapeRenderer.arc(x + width - radius, y + radius, radius, 270f, 90f); // BR
+        shapeRenderer.arc(x + width - radius, y + height - radius, radius, 0f, 90f); // TR
+        shapeRenderer.arc(x + radius, y + height - radius, radius, 90f, 90f); // TL
+    }
+
 
     private void updateMousePos(){
         if(Gdx.input.getDeltaX() != 0 || Gdx.input.getDeltaY() != 0){

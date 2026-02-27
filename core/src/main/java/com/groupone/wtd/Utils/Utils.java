@@ -1,19 +1,18 @@
 package com.groupone.wtd.Utils;
 
-import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.scenes.scene2d.Actor;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.badlogic.gdx.utils.Array;
 import com.groupone.wtd.Assets.SoundManager;
-import com.groupone.wtd.GameLauncher;
 
 public class Utils {
     public static TextureRegion[] generateSheet(Texture texture, int rows, int cols){
@@ -38,7 +37,8 @@ public class Utils {
         parameter.color = Color.WHITE;
         parameter.borderColor = Color.BLACK;
         parameter.borderWidth = border;
-        parameter.minFilter = Texture.TextureFilter.Linear;
+        parameter.genMipMaps = true;
+        parameter.minFilter = Texture.TextureFilter.MipMapLinearLinear;
         parameter.magFilter = Texture.TextureFilter.Linear;
         return generator.generateFont(parameter);
     }
@@ -68,5 +68,14 @@ public class Utils {
         button.setPosition(posX, posY);
 
         return button;
+    }
+
+    public static void shuffleArray(Array<Integer> arr){
+        for(int i = arr.size - 1; i > 0; i--){
+            int j = MathUtils.random(0, i);
+            int temp = arr.get(j);
+            arr.set(j, arr.get(i));
+            arr.set(i, temp);
+        }
     }
 }

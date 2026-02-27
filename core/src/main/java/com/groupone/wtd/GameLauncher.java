@@ -34,7 +34,7 @@ public class GameLauncher extends Game {
         numberFont = Utils.createFont("number_font.ttf", 45, 2);
         UIFont3 = Utils.createFont("string_font.ttf", 25, 2);
         UIFont2 = Utils.createFont("number_font.ttf", 40, 3);
-        UIFont1 = Utils.createFont("string_font.ttf", 150, 5);
+        UIFont1 = Utils.createFont("game_over.otf", 110, 4);
         duckNumberFont = Utils.createFont("number_font.ttf", 70, 2);
 
 
