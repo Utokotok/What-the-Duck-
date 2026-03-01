@@ -21,6 +21,7 @@ public class Gun {
 
     public int gunMode = 1;
     public int[] availableGunMode = {2,2,2,2};
+    public int charCurrentAmmo = 2;
     private Animation<TextureRegion> gunModeFrames;
     private float gunModeState = 0f;
 
@@ -64,6 +65,10 @@ public class Gun {
         }
     }
 
+    public void charReloadGun() {
+        charCurrentAmmo = MathUtils.clamp(charCurrentAmmo + 2, 0, 5);
+    }
+
     public boolean checkIfOutOfAmmo(){
         boolean isOut = true;
         for(int i = 0; i < 4; i++){
@@ -76,12 +81,27 @@ public class Gun {
         return isOut;
     }
 
+    public boolean charCheckIfOutOfAmmo() {
+        boolean isOut = true;
+        if (charCurrentAmmo == 0) return false;
+        return isOut;
+    }
+
     public boolean checkAvailableAmmo(int mode){
         return availableGunMode[mode - 1] != 0;
     }
 
+    public boolean charCheckAvailableAmmo() {
+        return charCurrentAmmo - 1 != -1;
+    }
+
     public void consumeAmmo(int mode){
         availableGunMode[mode - 1] -= 1;
+    }
+
+    public void charConsumeAmmo() {
+        System.out.println("ammo left: " + (charCurrentAmmo - 1));
+        charCurrentAmmo -= 1;
     }
 
     public void updateState(){

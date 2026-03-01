@@ -129,6 +129,9 @@ public class Duck {
         }, 0.5f);
     }
 
+    public char getLetter(){return letter;}
+
+
     private void updateRemovable(){
         if(position.y - 70 <= GameLauncher.GROUND_HEIGHT && isShot){
             isRemovable = true;
