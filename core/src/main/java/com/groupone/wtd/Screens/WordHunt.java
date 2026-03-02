@@ -18,11 +18,15 @@ import java.util.ArrayList;
 public class WordHunt extends MainGame {
     int shots = 0;
     int baseScore = 200;
-    char targetChar;
+    int level = 0;
+    int streak = 1;
     char hitChar;
+    float changeDirectionCD = 1.2f;
 
     char[] duckLetters;
     ArrayList<Character> targetWordHitArr;
+    ArrayList<Integer> hitCharIndex;
+
 
     Word wordTargetGenerator = new Word();
     String wordTargetStr;
@@ -38,15 +42,34 @@ public class WordHunt extends MainGame {
     protected void customLogic() {
         if (targetWordHitArr.isEmpty()) {
             ducks.size = 0;
+            level ++;
             System.out.println("TOtal shots: " + shots);
+            timeRemaining += Math.max(10f, 20 - level * 2f);
             shots -= duckLetters.length  - 2;
-            points += baseScore / Math.max(shots, 1);
+            points += (int) ((baseScore / Math.max(shots,1)) + (baseScore / Math.max(shots,1)) * (streak /  10f));
             System.out.println("BS: " + baseScore);
             System.out.println("Shots: " +  shots);
             shots = 0;
 
             generateRandomWord();
             spawnDucks();;
+        }
+
+        if(gun.charCheckIfOutOfAmmo() && !targetWordHitArr.isEmpty()){
+            isGameOver = true;
+            gameOver.setReason(0);
+            System.out.println("reason 0");
+        } else if(timeRemaining <= 0f){
+            isGameOver = true;
+            gameOver.setReason(2);
+            System.out.println("reason 2");
+        }
+
+        changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
+
+        for(Duck duck : ducks){
+            duck.setMinMaxVelocity(streak);
+            duck.setChangeDirectionCD(changeDirectionCD);
         }
     }
 
@@ -74,10 +97,6 @@ public class WordHunt extends MainGame {
     protected void customClick() {
         gun.charConsumeAmmo();
         shots++;
-        //        System.out.println("Shots: " + shots);
-        if (gun.charCheckIfOutOfAmmo() && hitChar != targetChar) {
-            isGameOver = true;
-        }
     }
 
     @Override
@@ -95,19 +114,19 @@ public class WordHunt extends MainGame {
     protected void customText() {
         GlyphLayout letterWidth = new GlyphLayout();
 
-        stringFont.draw(game.batch, "TARGET", 80, 88);
+        stringFont.draw(game.batch, "TARGET", 71, 88);
         letterWidth.setText(charFont, wordTargetStr);
 
-        float xPosition = 20 + (200 - letterWidth.width) / 2f;
+        float xPosition = 11 + (200 - letterWidth.width) / 2f;
         float yPosition = 63;
 
         for (int i = 0; i < wordTargetStr.length(); i++) {
             char c = wordTargetStr.charAt(i);
 
-            if (targetWordHitArr.contains(c)) {
-                charFont.setColor(1, 1, 1, 0.5f);
-            } else {
+            if (hitCharIndex.contains(i)) {
                 charFont.setColor(1, 1, 1, 1f);
+            } else {
+                charFont.setColor(1, 1, 1, 0.5f);
             }
 
             String letter = String.valueOf(c);
@@ -124,9 +143,7 @@ public class WordHunt extends MainGame {
     }
 
     @Override
-    protected void customFailHit() {
-
-    }
+    protected void customFailHit() { streak = 1; }
 
     public WordHunt(GameLauncher game) {
         super(game);
@@ -155,7 +172,7 @@ public class WordHunt extends MainGame {
         ducks.clear();
 
         for (int i = 0; i < duckLetters.length; i++) {
-            ducks.add(new Duck(game, 300, 500, 0.5f, 0.5f, duckLetters[i]));
+            ducks.add(new Duck(game, 300, 500, changeDirectionCD, 0.5f, duckLetters[i]));
             System.out.println(ducks);
         }
     }
@@ -163,12 +180,25 @@ public class WordHunt extends MainGame {
     @Override
     protected void customDuckHit(Duck duck) {
         char duckLetter = Character.toUpperCase(duck.getLetter());
+        streak++;
 
         if (targetWordHitArr.contains(duckLetter)) {
+
+            int charIndex = wordTargetStr.indexOf(duckLetter);
+
+            while (charIndex != -1) {
+                if (!hitCharIndex.contains(charIndex)) {
+                    hitCharIndex.add(charIndex);
+                    break;
+                }
+                charIndex = wordTargetStr.indexOf(duckLetter, charIndex + 1);
+            }
+
+            System.out.println("CURRENT INDEX" + hitCharIndex);
             targetWordHitArr.remove(Character.valueOf(duckLetter));
+            System.out.println("Updated Array: " + targetWordHitArr);
             hitChar = duckLetter;
             gun.charReloadGun();
-            System.out.println("Updated Array: " + targetWordHitArr);
         }
     }
 
@@ -178,6 +208,7 @@ public class WordHunt extends MainGame {
         int wordLength = wordTargetStr.length();
         System.out.println(wordLength);
 
+        hitCharIndex = new ArrayList<>();
         targetWordHitArr = new ArrayList<>();
         duckLetters = new char[wordLength + 2];
 

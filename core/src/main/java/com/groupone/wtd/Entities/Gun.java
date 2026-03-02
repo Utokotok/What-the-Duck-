@@ -82,8 +82,8 @@ public class Gun {
     }
 
     public boolean charCheckIfOutOfAmmo() {
-        boolean isOut = true;
-        if (charCurrentAmmo == 0) return false;
+        boolean isOut = false;
+        if (charCurrentAmmo == 0) return true;
         return isOut;
     }
 

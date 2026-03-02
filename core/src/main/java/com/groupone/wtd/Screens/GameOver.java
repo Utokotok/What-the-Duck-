@@ -91,7 +91,11 @@ public class GameOver {
         tryAgain.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y){
-                game.setScreen(new NumHunt(game));
+                if (currGame instanceof WordHunt) {
+                    game.setScreen(new WordHunt(game));
+                } else {
+                    game.setScreen(new NumHunt(game));
+                }
             }
             @Override
             public void enter(InputEvent event, float x, float y, int pointer, Actor fromActor){
