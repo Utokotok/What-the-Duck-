@@ -26,7 +26,11 @@ allprojects {
 
 configure(subprojects) {
   apply plugin: 'java-library'
-  java.sourceCompatibility = 23
+  java {
+    toolchain {
+      languageVersion = JavaLanguageVersion.of(23)
+    }
+  }
 
   // From https://lyze.dev/2021/04/29/libGDX-Internal-Assets-List/
   // The article can be helpful when using assets.txt in your project.
@@ -65,4 +69,4 @@ subprojects {
   }
 }
 
-eclipse.project.name = 'What the Duck!?' + '-parent'
+eclipse.project.name = 'What the Duck-parent'

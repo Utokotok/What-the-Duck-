@@ -21,12 +21,7 @@ import io.github.fourlastor.construo.Target
 sourceSets.main.resources.srcDirs += [ rootProject.file('assets').path ]
 application.mainClass = 'com.groupone.wtd.lwjgl3.Lwjgl3Launcher'
 application.applicationName = appName
-eclipse.project.name = appName + '-lwjgl3'
-java.sourceCompatibility = 23
-java.targetCompatibility = 23
-if (JavaVersion.current().isJava9Compatible()) {
-        compileJava.options.release.set(23)
-}
+eclipse.project.name = (appName + '-lwjgl3').replace('!', '').replace('?', '')
 
 dependencies {
   implementation "com.badlogicgames.gdx:gdx-backend-lwjgl3:$gdxVersion"

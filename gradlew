@@ -66,6 +66,11 @@
 
 # Attempt to set APP_HOME
 
+# Clear conflicting environment variables that might inject unwanted modules or arguments
+unset JAVA_OPTS
+unset _JAVA_OPTIONS
+unset JAVA_TOOL_OPTIONS
+
 # Resolve links: $0 may be a link
 app_path=$0
 
