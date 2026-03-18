@@ -16,6 +16,7 @@ import com.groupone.wtd.Assets.Assets;
 import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.GameLauncher;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.groupone.wtd.Utils.LeaderboardManager;
 import com.groupone.wtd.Utils.Utils;
 
 public class GameOver {
@@ -128,6 +129,9 @@ public class GameOver {
     public void setReason(int reason){
         this.reason = reasons[reason][MathUtils.random(0, 4)];
         gameOverText.setText(this.reason);
+        // Save score now — currGame.points has the real final value
+        String gameMode = (currGame instanceof WordHunt) ? "WordHunt" : "NumHunt";
+        LeaderboardManager.saveScore(currGame.points, gameMode);
     }
 
     public void updateGameOver(float delta){
