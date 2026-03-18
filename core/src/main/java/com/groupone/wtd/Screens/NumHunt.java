@@ -153,7 +153,7 @@ public class NumHunt extends MainGame {
     }
 
     @Override
-    protected void customDuckHit(Duck duck) {
+    protected boolean customDuckHit(Duck duck) {
         streak++;
         switch (gun.gunMode){
             case 1 -> {currentNumber += duck.getNumber();}
@@ -161,6 +161,7 @@ public class NumHunt extends MainGame {
             case 3 -> {currentNumber *= duck.getNumber();}
             case 4 -> {currentNumber /= duck.getNumber();}
         }
+        return true;
     }
 
     public void generateRandomEquation(int startRange, int endRange){

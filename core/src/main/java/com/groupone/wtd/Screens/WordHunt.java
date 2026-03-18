@@ -1,19 +1,19 @@
 package com.groupone.wtd.Screens;
 
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.groupone.wtd.Entities.Duck;
-import com.groupone.wtd.GameLauncher;
-
 import com.groupone.wtd.Entities.Word;
-
-import java.util.ArrayList;
+import com.groupone.wtd.GameLauncher;
 
 public class WordHunt extends MainGame {
     int shots = 0;
@@ -24,7 +24,7 @@ public class WordHunt extends MainGame {
     float changeDirectionCD = 1.2f;
 
     char[] duckLetters;
-    ArrayList<Character> targetWordHitArr;
+    Queue<Character> targetWordHitArr;
     ArrayList<Integer> hitCharIndex;
 
 
@@ -43,26 +43,23 @@ public class WordHunt extends MainGame {
         if (targetWordHitArr.isEmpty()) {
             ducks.size = 0;
             level ++;
-            System.out.println("TOtal shots: " + shots);
+            System.out.println("Total shots: " + shots);
             timeRemaining += Math.max(10f, 20 - level * 2f);
             shots -= duckLetters.length  - 2;
             points += (int) ((baseScore / Math.max(shots,1)) + (baseScore / Math.max(shots,1)) * (streak /  10f));
             System.out.println("BS: " + baseScore);
             System.out.println("Shots: " +  shots);
             shots = 0;
-
             generateRandomWord();
-            spawnDucks();;
+            spawnDucks();
         }
 
         if(gun.charCheckIfOutOfAmmo() && !targetWordHitArr.isEmpty()){
             isGameOver = true;
             gameOver.setReason(0);
-            System.out.println("reason 0");
         } else if(timeRemaining <= 0f){
             isGameOver = true;
             gameOver.setReason(2);
-            System.out.println("reason 2");
         }
 
         changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
@@ -178,7 +175,11 @@ public class WordHunt extends MainGame {
     }
 
     @Override
-    protected void customDuckHit(Duck duck) {
+    protected boolean customDuckHit(Duck duck) {
+        if(targetWordHitArr.isEmpty() || duck.getLetter() != targetWordHitArr.peek()){
+            return false;
+        }
+
         char duckLetter = Character.toUpperCase(duck.getLetter());
         streak++;
 
@@ -195,11 +196,12 @@ public class WordHunt extends MainGame {
             }
 
             System.out.println("CURRENT INDEX" + hitCharIndex);
-            targetWordHitArr.remove(Character.valueOf(duckLetter));
+            targetWordHitArr.poll();
             System.out.println("Updated Array: " + targetWordHitArr);
             hitChar = duckLetter;
             gun.charReloadGun();
         }
+        return true;
     }
 
     public void generateRandomWord() {
@@ -209,16 +211,17 @@ public class WordHunt extends MainGame {
         System.out.println(wordLength);
 
         hitCharIndex = new ArrayList<>();
-        targetWordHitArr = new ArrayList<>();
+        targetWordHitArr = new LinkedList<>();
         duckLetters = new char[wordLength + 2];
 
         for (char word : wordTargetStr.toCharArray()) {
             targetWordHitArr.add(word);
         }
 
+        List<Character> targetWordList = new ArrayList<>(targetWordHitArr);
         for (int i = 0; i < duckLetters.length; i++) {
             if (i < wordLength) {
-                duckLetters[i] = targetWordHitArr.get(i);
+                duckLetters[i] = targetWordList.get(i);
             } else {
                 char randomChar;
                 do {
