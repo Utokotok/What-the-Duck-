@@ -39,7 +39,14 @@ public class Assets {
         manager.load("Buttons/continue.png", Texture.class);
         manager.load("Buttons/try_again.png", Texture.class);
         manager.load("Buttons/about.png", Texture.class);
+        manager.load("Buttons/board.png", Texture.class);
+        manager.load("Buttons/instructions.png", Texture.class);
+        manager.load("Buttons/leaderboards.png", Texture.class);
         manager.load("Buttons/pause.png", Texture.class);
+        manager.load("Photos/Gumabon.png", Texture.class);
+        manager.load("Photos/Lalamoro.png", Texture.class);
+        manager.load("Photos/Loplop.png", Texture.class);
+        manager.load("Photos/Macaraig.png", Texture.class);
         manager.load("Background/bush.png", Texture.class);
         manager.load("Background/background.png", Texture.class);
         manager.load("Logo/wtd_logo.png", Texture.class);

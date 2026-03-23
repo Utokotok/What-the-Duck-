@@ -20,25 +20,27 @@ public class LeaderboardManager {
         public final String gameMode;
         public final String date;
         public final String time;
+        public final String name;
 
-        public Entry(int score, String gameMode, String date, String time) {
+        public Entry(int score, String gameMode, String date, String time, String name) {
             this.score    = score;
             this.gameMode = gameMode;
             this.date     = date;
             this.time     = time;
+            this.name     = name;
         }
     }
 
     // ── Write ─────────────────────────────────────────────────────────────────
 
     /** Appends a new score entry (with current date/time) to leaderboard.json. */
-    public static void saveScore(int score, String gameMode) {
+    public static void saveScore(int score, String gameMode, String name) {
         LocalDateTime now  = LocalDateTime.now();
         String date        = now.format(DATE_FMT);
         String time        = now.format(TIME_FMT);
 
         List<Entry> entries = readEntries();
-        entries.add(new Entry(score, gameMode, date, time));
+        entries.add(new Entry(score, gameMode, date, time, name));
         writeEntries(entries);
     }
 
@@ -95,6 +97,7 @@ public class LeaderboardManager {
                 String gameMode = "";
                 String date     = "";
                 String time     = "";
+                String name     = "";
 
                 for (String token : obj.split(",")) {
                     token = token.trim();
@@ -107,9 +110,10 @@ public class LeaderboardManager {
                         case "gameMode": gameMode = val;                   break;
                         case "date":     date     = val;                   break;
                         case "time":     time     = val;                   break;
+                        case "name":     name     = val;                   break;
                     }
                 }
-                entries.add(new Entry(score, gameMode, date, time));
+                entries.add(new Entry(score, gameMode, date, time, name));
             }
         } catch (Exception e) {
             Gdx.app.log("Leaderboard", "Error reading leaderboard: " + e.getMessage());
@@ -126,7 +130,8 @@ public class LeaderboardManager {
                   .append("\"score\": ").append(e.score).append(", ")
                   .append("\"gameMode\": \"").append(e.gameMode).append("\", ")
                   .append("\"date\": \"").append(e.date).append("\", ")
-                  .append("\"time\": \"").append(e.time).append("\"")
+                  .append("\"time\": \"").append(e.time).append("\", ")
+                  .append("\"name\": \"").append(e.name).append("\"")
                   .append("}");
                 if (i < entries.size() - 1) sb.append(",");
                 sb.append("\n");

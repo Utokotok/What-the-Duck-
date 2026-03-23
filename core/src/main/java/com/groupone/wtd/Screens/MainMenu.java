@@ -38,7 +38,10 @@ public class MainMenu implements Screen {
     ImageButton quitButton;
     ImageButton aboutButton;
     ImageButton leaderboardButton;
-    Texture leaderboardPlaceholderTex;
+    ImageButton instructionsButton;
+    ImageButton muteButton;
+    Texture muteTex;
+    Texture muteOnTex;
     Sound buttonPressSound;
     Sound buttonHoverSound;
     Stage stage;
@@ -155,6 +158,7 @@ public class MainMenu implements Screen {
             initializeButtons();
             AnimationManager.initializeDucks();
             SoundManager.initializeSound(game);
+            SoundManager.initializeExtraSounds(game);
             playBackgroundMusic();
         }
     }
@@ -169,16 +173,51 @@ public class MainMenu implements Screen {
         aboutButton = Utils.createButton(game.manager.get("Buttons/about.png"), 150, 1500, 0.3f, false);
         quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), 150, 1500, 0.3f, false);
 
-        // Leaderboard placeholder button (generated programmatically)
-        Pixmap pixmap = new Pixmap(160, 60, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0.18f, 0.22f, 0.42f, 1f); // dark navy fill
-        pixmap.fill();
-        pixmap.setColor(0.91f, 0.27f, 0.38f, 1f); // vivid red border
-        pixmap.drawRectangle(0, 0, 160, 60);
-        pixmap.drawRectangle(1, 1, 158, 58);
-        leaderboardPlaceholderTex = new Texture(pixmap);
-        pixmap.dispose();
-        leaderboardButton = Utils.createButton(leaderboardPlaceholderTex, 1500, 1500, 1f, false);
+        leaderboardButton = Utils.createButton(game.manager.get("Buttons/leaderboards.png"), 1500, 1500, 0.12f, false);
+        instructionsButton = Utils.createButton(game.manager.get("Buttons/instructions.png"), 1500, 1500, 0.12f, false);
+
+        // ── Mute button (placeholder) ─────────────────────────────────────
+        Pixmap mutePm = new Pixmap(60, 60, Pixmap.Format.RGBA8888);
+        mutePm.setColor(0.18f, 0.22f, 0.42f, 0.85f);
+        mutePm.fill();
+        mutePm.setColor(1f, 1f, 1f, 1f);
+        mutePm.drawRectangle(0, 0, 60, 60);
+        mutePm.drawRectangle(1, 1, 58, 58);
+        muteTex = new Texture(mutePm);
+        mutePm.dispose();
+
+        Pixmap muteOnPm = new Pixmap(60, 60, Pixmap.Format.RGBA8888);
+        muteOnPm.setColor(0.91f, 0.27f, 0.38f, 0.85f);
+        muteOnPm.fill();
+        muteOnPm.setColor(1f, 1f, 1f, 1f);
+        muteOnPm.drawRectangle(0, 0, 60, 60);
+        muteOnPm.drawRectangle(1, 1, 58, 58);
+        muteOnTex = new Texture(muteOnPm);
+        muteOnPm.dispose();
+
+        ImageButton.ImageButtonStyle muteStyle = new ImageButton.ImageButtonStyle();
+        muteStyle.up = new TextureRegionDrawable(muteTex);
+        muteStyle.over = new TextureRegionDrawable(muteTex).tint(Color.LIGHT_GRAY);
+        muteStyle.down = new TextureRegionDrawable(muteOnTex);
+        muteButton = new ImageButton(muteStyle);
+        muteButton.setSize(60, 60);
+        muteButton.setPosition(GameLauncher.gameWidth - 80f, GameLauncher.gameHeight + 100f);
+
+        muteButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                SoundManager.toggleMenuMute();
+                // Swap visual: red when muted, navy when unmuted
+                ImageButton.ImageButtonStyle style = muteButton.getStyle();
+                if (SoundManager.isMenuMuted()) {
+                    style.up = new TextureRegionDrawable(muteOnTex);
+                    style.over = new TextureRegionDrawable(muteOnTex).tint(Color.LIGHT_GRAY);
+                } else {
+                    style.up = new TextureRegionDrawable(muteTex);
+                    style.over = new TextureRegionDrawable(muteTex).tint(Color.LIGHT_GRAY);
+                }
+            }
+        });
 
         wordHuntButton.addListener(new ClickListener(){
             @Override
@@ -272,7 +311,19 @@ public class MainMenu implements Screen {
             leaderboardButton.addAction(
                 Actions.sequence(
                     Actions.delay(animationDelay + 1.75f),
-                    Actions.moveTo(GameLauncher.gameWidth - 190f, 30f, 0.2f, Interpolation.pow2In)
+                    Actions.moveTo(GameLauncher.gameWidth - 110f, 30f, 0.2f, Interpolation.pow2In)
+                )
+            );
+            instructionsButton.addAction(
+                Actions.sequence(
+                    Actions.delay(animationDelay + 2.0f),
+                    Actions.moveTo(GameLauncher.gameWidth - 220f, 30f, 0.2f, Interpolation.pow2In)
+                )
+            );
+            muteButton.addAction(
+                Actions.sequence(
+                    Actions.delay(animationDelay + 2.25f),
+                    Actions.moveTo(GameLauncher.gameWidth - 80f, GameLauncher.gameHeight - 80f, 0.2f, Interpolation.pow2In)
                 )
             );
         } else{
@@ -309,10 +360,21 @@ public class MainMenu implements Screen {
             leaderboardButton.addAction(
                 Actions.sequence(
                     Actions.delay(1.0f),
-                    Actions.moveTo(GameLauncher.gameWidth - 190f, 30f, 0.2f, Interpolation.pow2In)
+                    Actions.moveTo(GameLauncher.gameWidth - 110f, 30f, 0.2f, Interpolation.pow2In)
                 )
             );
-
+            instructionsButton.addAction(
+                Actions.sequence(
+                    Actions.delay(1.25f),
+                    Actions.moveTo(GameLauncher.gameWidth - 220f, 30f, 0.2f, Interpolation.pow2In)
+                )
+            );
+            muteButton.addAction(
+                Actions.sequence(
+                    Actions.delay(1.5f),
+                    Actions.moveTo(GameLauncher.gameWidth - 80f, GameLauncher.gameHeight - 80f, 0.2f, Interpolation.pow2In)
+                )
+            );
         }
 
         numHuntButton.addListener(new ClickListener(){
@@ -345,11 +407,27 @@ public class MainMenu implements Screen {
             }
         });
 
+        aboutButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                game.setScreen(new AboutScreen(game));
+            }
+        });
+
+        instructionsButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                game.setScreen(new InstructionsScreen(game));
+            }
+        });
+
         stage.addActor(logoIntro);
         stage.addActor(aboutButton);
         stage.addActor(wordHuntButton);
         stage.addActor(numHuntButton);
         stage.addActor(quitButton);
         stage.addActor(leaderboardButton);
+        stage.addActor(instructionsButton);
+        stage.addActor(muteButton);
     }
 }

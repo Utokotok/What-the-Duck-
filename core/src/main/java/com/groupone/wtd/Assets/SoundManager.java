@@ -220,4 +220,51 @@ public class SoundManager {
 //        }, 0.5f);
 //    }
 
+    // ── Mute toggles ────────────────────────────────────────────────────────
+    private static boolean menuMuted = false;
+    private static boolean gameMuted = false; // placeholder for game music mute
+
+    private static Sound buttonPress;
+    private static Sound buttonHover;
+
+    public static void initializeExtraSounds(GameLauncher game) {
+        buttonPress = game.manager.get("Sounds/button_press.mp3");
+        buttonHover = game.manager.get("Sounds/button_hover.mp3");
+    }
+
+    public static void toggleMenuMute() {
+        menuMuted = !menuMuted;
+        if (backgroundMusic != null) {
+            if (menuMuted) {
+                backgroundMusic.setVolume(0f);
+            } else {
+                backgroundMusic.setVolume(backgroundVolume);
+            }
+        }
+    }
+
+    public static boolean isMenuMuted() {
+        return menuMuted;
+    }
+
+    /** Placeholder — toggle game music mute (hook up when game music is ready) */
+    public static void toggleGameMute() {
+        gameMuted = !gameMuted;
+        // TODO: apply mute to game music when implemented
+    }
+
+    public static boolean isGameMuted() {
+        return gameMuted;
+    }
+
+    public static void playButtonPress() {
+        long id = buttonPress.play();
+        buttonPress.setVolume(id, voiceVolume * 5f);
+    }
+
+    public static void playButtonHover() {
+        long id = buttonHover.play();
+        buttonHover.setVolume(id, voiceVolume * 3f);
+    }
+
 }
