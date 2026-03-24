@@ -50,41 +50,17 @@ public class GameOver {
     // ── Name input UI ────────────────────────────────────────────────────────
     private TextField nameField;
     private ImageButton submitBtn;
-    private Label submitLabel;
     private Label validationLabel;
     private Label namePromptLabel;
-
-    // -------------------------------------------------------------------------
-    // IMAGE PLACEHOLDER — Replace with your actual asset when ready
-    // Expected file: assets/GameOver/name_input_bg.png (background behind name
-    // input area)
-    // -------------------------------------------------------------------------
-    // nameInputBgTex = new
-    // Texture(Gdx.files.internal("GameOver/name_input_bg.png"));
-
-    // -------------------------------------------------------------------------
-    // IMAGE PLACEHOLDER — Replace with your actual asset when ready
-    // Expected file: assets/GameOver/text_field_bg.png (text field background)
-    // -------------------------------------------------------------------------
-    // textFieldBgTex = new
-    // Texture(Gdx.files.internal("GameOver/text_field_bg.png"));
-
-    // -------------------------------------------------------------------------
-    // IMAGE PLACEHOLDER — Replace with your actual asset when ready
-    // Expected file: assets/GameOver/ok_button.png (submit / OK button)
-    // -------------------------------------------------------------------------
-    // okButtonTex = new Texture(Gdx.files.internal("GameOver/ok_button.png"));
-
-    // -------------------------------------------------------------------------
-    // IMAGE PLACEHOLDER — Replace with your actual asset when ready
-    // Expected file: assets/GameOver/ok_button_hover.png (submit / OK button hover)
-    // -------------------------------------------------------------------------
-    // okButtonHoverTex = new
-    // Texture(Gdx.files.internal("GameOver/ok_button_hover.png"));
 
     private boolean nameSubmitted = false;
     private String playerName = "";
     private static final int MAX_NAME_LENGTH = 12;
+
+    // Layout refs for submit animation
+    private float startX, fieldX, sBtnX;
+    private float sBtnW, sBtnH;
+    private float totalW;
 
     public GameOver(GameLauncher game, MainGame currGame) {
         this.game = game;
@@ -110,32 +86,35 @@ public class GameOver {
                     @Override
                     public void run() {
                         stage.addActor(Assets.getFlash());
+                        SoundManager.playGameOverDrop();
                     }
                 }),
                 Actions.moveTo(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f,
                         GameLauncher.gameHeight / 2f - gameOverText.getHeight() / 2f + 150, 0.5f,
                         Interpolation.bounceOut)));
         pointsText.addAction(Actions.sequence(
-                Actions.delay(animationDelay),
-                Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        SoundManager.playGameOver();
-                    }
-                }),
-                Actions.delay(animationDelay),
-                Actions.moveTo(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, 390, 1f,
-                        Interpolation.bounceOut)));
+            Actions.delay(animationDelay),
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    SoundManager.playGameOverHalf1();
+                }
+            }),
+            Actions.delay(animationDelay),
+            Actions.moveTo(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, 390, 1f, Interpolation.bounceOut)
+        ));
 
-        // Try Again and Quit are hidden until name is submitted
+        // Try Again and Quit are hidden until OK is clicked
         tryAgain.setVisible(false);
         quit.setVisible(false);
+
 
         buildNameInputUI();
 
         tryAgain.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                saveScore();
                 if (currGame instanceof WordHunt) {
                     game.setScreen(new WordHunt(game));
                 } else {
@@ -154,6 +133,7 @@ public class GameOver {
         quit.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                saveScore();
                 game.setScreen(new MainMenu(game));
             }
 
@@ -171,41 +151,101 @@ public class GameOver {
         stage.addActor(pointsText);
     }
 
+    /** Shared submit logic — called by both proceed button click and Enter key. */
+    private void doSubmit() {
+        if (nameSubmitted) return;
+        SoundManager.playClick();
+        saveScore();
+        validationLabel.setText("Score saved!");
+        validationLabel.getStyle().fontColor = new Color(0.4f, 1f, 0.4f, 1f);
+
+        // Hide submit button visually and disable name field
+        submitBtn.setTouchable(Touchable.disabled);
+        nameField.setDisabled(true);
+
+        float dropTarget = -200f;
+        float dur = 0.35f;
+
+        namePromptLabel.addAction(Actions.moveTo(startX, dropTarget, dur, Interpolation.pow2In));
+        nameField.addAction(Actions.moveTo(fieldX, dropTarget, dur, Interpolation.pow2In));
+        validationLabel.addAction(Actions.moveTo(startX, dropTarget, dur, Interpolation.pow2In));
+        submitBtn.addAction(Actions.moveTo(sBtnX, dropTarget, dur, Interpolation.pow2In));
+
+        // Play second half audio
+        SoundManager.playGameOverHalf2();
+
+        // Drop tryAgain and quit
+        tryAgain.setVisible(true);
+        quit.setVisible(true);
+
+        tryAgain.setPosition(tryAgain.getX(), GameLauncher.gameHeight + 100);
+        quit.setPosition(quit.getX(), GameLauncher.gameHeight + 100);
+
+        tryAgain.addAction(Actions.sequence(
+            Actions.delay(0.2f),
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    SoundManager.playTryAgainDrop();
+                }
+            }),
+            Actions.moveTo(tryAgain.getX(), 250, 0.25f, Interpolation.bounceOut)
+        ));
+        quit.addAction(Actions.sequence(
+            Actions.delay(0.45f),
+            Actions.moveTo(quit.getX(), 110, 0.25f, Interpolation.bounceOut),
+            Actions.run(new Runnable() {
+                @Override
+                public void run() {
+                    isAnimationDone = true;
+                }
+            })
+        ));
+    }
+
     private void buildNameInputUI() {
         float W = GameLauncher.gameWidth;
+        float H = GameLauncher.gameHeight;
+
+        // ── Layout variables (Center) ───────────────────────────────
+        float fieldW = 400f;
+        float fieldH = 65f;
+        sBtnW = 65f;
+        sBtnH = 65f;
+
+        // Center layout dynamically
+        totalW = fieldW + 20f + sBtnW;
+        startX = W / 2f - totalW / 2f;
+        fieldX = startX;
+        sBtnX = startX + fieldW + 20f;
 
         // ── Fonts & styles ───────────────────────────────────────────────────
-        com.badlogic.gdx.graphics.g2d.BitmapFont promptFont = Utils.createFont("number_font.ttf", 22, 2);
-        com.badlogic.gdx.graphics.g2d.BitmapFont fieldFont = Utils.createFont("number_font.ttf", 20, 1);
-        com.badlogic.gdx.graphics.g2d.BitmapFont smallFont = Utils.createFont("number_font.ttf", 16, 1);
+        com.badlogic.gdx.graphics.g2d.BitmapFont promptFont = Utils.createFont("number_font.ttf", 36, 2);
+        com.badlogic.gdx.graphics.g2d.BitmapFont fieldFont = Utils.createFont("number_font.ttf", 36, 1);
+        com.badlogic.gdx.graphics.g2d.BitmapFont smallFont = Utils.createFont("number_font.ttf", 18, 1);
 
         Label.LabelStyle promptStyle = new Label.LabelStyle(promptFont, Color.WHITE);
         Label.LabelStyle validStyle = new Label.LabelStyle(smallFont, new Color(1f, 0.4f, 0.4f, 1f));
 
         // ── Name prompt label ────────────────────────────────────────────────
-        namePromptLabel = new Label("Enter your name (maximum: 12 characters)", promptStyle);
-        namePromptLabel.setWidth(W);
+        namePromptLabel = new Label("Enter your name", promptStyle);
+        namePromptLabel.setWidth(totalW);
         namePromptLabel.setAlignment(Align.center);
-        namePromptLabel.setPosition(0, -100f); // off-screen, animates in
+        namePromptLabel.setPosition(startX, H + 100f); // off-screen top, animates in down
 
-        // ── TextField ────────────────────────────────────────────────────────
-        // Falls back to solidTexture — replace with actual assets above
-        Texture fieldBgTex = solidTexture(0x16213eFF);
+        // ── TextField — use input.png as background ──────────────────────────
+        Texture inputBgTex = game.manager.get("Buttons/input.png");
         Texture cursorTex = solidTexture(0xFFFFFFFF);
 
         TextField.TextFieldStyle tfStyle = new TextField.TextFieldStyle();
         tfStyle.font = fieldFont;
         tfStyle.fontColor = Color.WHITE;
-        TextureRegionDrawable bgDrawable = new TextureRegionDrawable(fieldBgTex);
-        bgDrawable.setLeftWidth(10f);
+        TextureRegionDrawable bgDrawable = new TextureRegionDrawable(inputBgTex);
+        bgDrawable.setLeftWidth(25f);
         bgDrawable.setRightWidth(10f);
         tfStyle.background = bgDrawable;
         tfStyle.cursor = new TextureRegionDrawable(cursorTex);
-        tfStyle.cursor.setMinWidth(2f);
-
-        float fieldW = 300f;
-        float fieldH = 44f;
-        float fieldX = W / 2f - fieldW / 2f - 60f;
+        tfStyle.cursor.setMinWidth(4f);
 
         nameField = new TextField("", tfStyle);
         nameField.setMaxLength(MAX_NAME_LENGTH);
@@ -217,117 +257,90 @@ public class GameOver {
         });
         nameField.setMessageText("Your name...");
         nameField.setSize(fieldW, fieldH);
-        nameField.setPosition(fieldX, -100f); // off-screen
+        nameField.setPosition(fieldX, H + 100f); // off-screen top
 
-        // ── Validation label ─────────────────────────────────────────────────
-        validationLabel = new Label("", validStyle);
-        validationLabel.setPosition(fieldX, -100f);
-
-        // ── Submit / OK button ───────────────────────────────────────────────
-        // Falls back to solidTexture — replace with actual assets above
-        Texture submitUpTex = solidTexture(0xe94560FF);
-        Texture submitOverTex = solidTexture(0xc73652FF);
-
-        ImageButton.ImageButtonStyle submitStyle = new ImageButton.ImageButtonStyle();
-        submitStyle.up = new TextureRegionDrawable(submitUpTex);
-        submitStyle.over = new TextureRegionDrawable(submitOverTex);
-        submitStyle.down = new TextureRegionDrawable(submitOverTex);
-
-        float sBtnW = 100f, sBtnH = 44f;
-        float sBtnX = W / 2f + fieldW / 2f - 60f + 16f; // 16px margin after field
-
-        submitBtn = new ImageButton(submitStyle);
-        submitBtn.setSize(sBtnW, sBtnH);
-        submitBtn.setPosition(sBtnX, -100f); // off-screen
-
-        Label.LabelStyle headStyle = new Label.LabelStyle(promptFont, Color.WHITE);
-        submitLabel = new Label("OK", headStyle);
-        submitLabel.setPosition(
-                sBtnX + (sBtnW - submitLabel.getPrefWidth()) / 2f,
-                -100f);
-        submitLabel.setTouchable(Touchable.disabled); // prevent blocking clicks on button
-
-        // ── Landing Y positions ──────────────────────────────────────────────
-        final float promptY = 345f;
-        final float fieldY = 295f;
-        final float validY = 272f;
-        final float okBtnY = 295f;
-
-        submitBtn.addListener(new ClickListener() {
+        // ── Enter key support ────────────────────────────────────────────────
+        nameField.setTextFieldListener(new TextField.TextFieldListener() {
             @Override
-            public void clicked(InputEvent event, float x, float y) {
-                String text = nameField.getText().trim();
-                if (text.length() > 0) {
-                    playerName = text;
-                    nameSubmitted = true;
-                    SoundManager.playClick();
-
-                    // Save score with name
-                    String gameMode = (currGame instanceof WordHunt) ? "WordHunt" : "NumHunt";
-                    LeaderboardManager.saveScore(currGame.points, gameMode, playerName);
-
-                    // Slide everything DOWN off-screen completely
-                    float dropTarget = -200f;
-                    float dropDuration = 0.35f;
-                    namePromptLabel.addAction(Actions.moveTo(0, dropTarget, dropDuration, Interpolation.pow2In));
-                    nameField.addAction(Actions.moveTo(fieldX, dropTarget, dropDuration, Interpolation.pow2In));
-                    validationLabel.addAction(Actions.moveTo(fieldX, dropTarget, dropDuration, Interpolation.pow2In));
-                    submitBtn.addAction(Actions.moveTo(sBtnX, dropTarget, dropDuration, Interpolation.pow2In));
-                    submitLabel.addAction(Actions.moveTo(
-                            sBtnX + (sBtnW - submitLabel.getPrefWidth()) / 2f,
-                            dropTarget, dropDuration, Interpolation.pow2In));
-
-                    // Show try again / quit after name input drops
-                    tryAgain.setVisible(true);
-                    quit.setVisible(true);
-                    tryAgain.setPosition(tryAgain.getX(), GameLauncher.gameHeight + 100);
-                    quit.setPosition(quit.getX(), GameLauncher.gameHeight + 100);
-
-                    tryAgain.addAction(Actions.sequence(
-                            Actions.delay(dropDuration + 0.1f),
-                            Actions.moveTo(tryAgain.getX(), 250, 0.25f, Interpolation.bounceOut)));
-                    quit.addAction(Actions.sequence(
-                            Actions.delay(dropDuration + 0.35f),
-                            Actions.moveTo(quit.getX(), 110, 0.25f, Interpolation.bounceOut),
-                            Actions.run(new Runnable() {
-                                @Override
-                                public void run() {
-                                    isAnimationDone = true;
-                                }
-                            })));
-                } else {
-                    validationLabel.setText("Please enter a name!");
+            public void keyTyped(TextField textField, char c) {
+                if (c == '\n' || c == '\r') {
+                    doSubmit();
                 }
             }
         });
 
-        // ── Animate name input in after points text animation ────────────────
-        float nameInputDelay = animationDelay + animationDelay + 1.5f;
+        // ── Validation label ─────────────────────────────────────────────────
+        validationLabel = new Label("(max " + MAX_NAME_LENGTH + " chars)", validStyle);
+        validationLabel.setPosition(startX, H + 100f);
+        validationLabel.setWidth(totalW);
+        validationLabel.setAlignment(Align.center);
+
+        // ── Proceed button (replaces OK) — uses proceed.png ──────────────────
+        Texture proceedTex = game.manager.get("Buttons/proceed.png");
+
+        ImageButton.ImageButtonStyle submitStyle = new ImageButton.ImageButtonStyle();
+        submitStyle.up = new TextureRegionDrawable(proceedTex);
+        submitStyle.over = new TextureRegionDrawable(proceedTex).tint(Color.LIGHT_GRAY);
+        submitStyle.down = new TextureRegionDrawable(proceedTex).tint(Color.GRAY);
+
+        submitBtn = new ImageButton(submitStyle);
+        submitBtn.setSize(sBtnW, sBtnH);
+        submitBtn.setPosition(sBtnX, H + 100f); // off-screen top
+
+        // ── Landing Y positions ──────────────────────────────────────────────
+        final float promptY = 320f;
+        final float fieldY = 240f;
+        final float okBtnY = 240f;
+        final float validY = 210f;
+
+        submitBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                doSubmit();
+            }
+        });
+
+        // ── Animate name input sync with old delay ────────────────
+        float dropOne = animationDelay + 2.5f;
+        float dropDur = 0.25f;
 
         namePromptLabel.addAction(Actions.sequence(
-                Actions.delay(nameInputDelay),
-                Actions.moveTo(0, promptY, 0.4f, Interpolation.pow2Out)));
+                Actions.delay(dropOne),
+                Actions.moveTo(startX, promptY, dropDur, Interpolation.bounceOut)));
         nameField.addAction(Actions.sequence(
-                Actions.delay(nameInputDelay + 0.2f),
-                Actions.moveTo(fieldX, fieldY, 0.4f, Interpolation.pow2Out)));
+                Actions.delay(dropOne),
+                Actions.moveTo(fieldX, fieldY, dropDur, Interpolation.bounceOut),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        stage.setKeyboardFocus(nameField);
+                    }
+                })
+        ));
         validationLabel.addAction(Actions.sequence(
-                Actions.delay(nameInputDelay + 0.2f),
-                Actions.moveTo(fieldX, validY, 0.4f, Interpolation.pow2Out)));
+                Actions.delay(dropOne),
+                Actions.moveTo(startX, validY, dropDur, Interpolation.bounceOut)));
         submitBtn.addAction(Actions.sequence(
-                Actions.delay(nameInputDelay + 0.3f),
-                Actions.moveTo(sBtnX, okBtnY, 0.4f, Interpolation.pow2Out)));
-        submitLabel.addAction(Actions.sequence(
-                Actions.delay(nameInputDelay + 0.3f),
-                Actions.moveTo(
-                        sBtnX + (sBtnW - submitLabel.getPrefWidth()) / 2f,
-                        okBtnY + (sBtnH - submitLabel.getPrefHeight()) / 2f,
-                        0.4f, Interpolation.pow2Out)));
+                Actions.delay(dropOne),
+                Actions.moveTo(sBtnX, okBtnY, dropDur, Interpolation.bounceOut)));
 
         stage.addActor(namePromptLabel);
         stage.addActor(nameField);
         stage.addActor(validationLabel);
         stage.addActor(submitBtn);
-        stage.addActor(submitLabel);
+    }
+
+    private void saveScore() {
+        if (!nameSubmitted) {
+            String text = nameField.getText().trim();
+            if (text.isEmpty()) {
+                text = "---";
+            }
+            playerName = text;
+            nameSubmitted = true;
+            String gameMode = (currGame instanceof WordHunt) ? "WordHunt" : "NumHunt";
+            LeaderboardManager.saveScore(currGame.points, gameMode, playerName);
+        }
     }
 
     /** Creates a 1x1 Texture filled with the given RGBA8888 color int. */
@@ -343,8 +356,7 @@ public class GameOver {
     public void setReason(int reason) {
         this.reason = reasons[reason][MathUtils.random(0, 4)];
         gameOverText.setText(this.reason);
-        // Score is saved when the player submits their name (in submitBtn click
-        // handler)
+        SoundManager.stopBackgroundMusic();
     }
 
     public void updateGameOver(float delta) {

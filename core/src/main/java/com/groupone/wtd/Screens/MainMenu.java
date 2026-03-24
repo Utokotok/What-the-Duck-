@@ -5,18 +5,18 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -39,15 +39,15 @@ public class MainMenu implements Screen {
     ImageButton aboutButton;
     ImageButton leaderboardButton;
     ImageButton instructionsButton;
-    ImageButton muteButton;
-    Texture muteTex;
-    Texture muteOnTex;
     Sound buttonPressSound;
     Sound buttonHoverSound;
     Stage stage;
     InputMultiplexer inputMultiplexer;
     Animation<TextureRegion> logoFrames;
     Image logoIntro;
+
+    // ── Settings button ──────────────────────────────────────────────────────
+    ImageButton settingsButton;
 
     Vector2 gameCenter = new Vector2(0,0);
     Texture bush;
@@ -176,48 +176,15 @@ public class MainMenu implements Screen {
         leaderboardButton = Utils.createButton(game.manager.get("Buttons/leaderboards.png"), 1500, 1500, 0.12f, false);
         instructionsButton = Utils.createButton(game.manager.get("Buttons/instructions.png"), 1500, 1500, 0.12f, false);
 
-        // ── Mute button (placeholder) ─────────────────────────────────────
-        Pixmap mutePm = new Pixmap(60, 60, Pixmap.Format.RGBA8888);
-        mutePm.setColor(0.18f, 0.22f, 0.42f, 0.85f);
-        mutePm.fill();
-        mutePm.setColor(1f, 1f, 1f, 1f);
-        mutePm.drawRectangle(0, 0, 60, 60);
-        mutePm.drawRectangle(1, 1, 58, 58);
-        muteTex = new Texture(mutePm);
-        mutePm.dispose();
-
-        Pixmap muteOnPm = new Pixmap(60, 60, Pixmap.Format.RGBA8888);
-        muteOnPm.setColor(0.91f, 0.27f, 0.38f, 0.85f);
-        muteOnPm.fill();
-        muteOnPm.setColor(1f, 1f, 1f, 1f);
-        muteOnPm.drawRectangle(0, 0, 60, 60);
-        muteOnPm.drawRectangle(1, 1, 58, 58);
-        muteOnTex = new Texture(muteOnPm);
-        muteOnPm.dispose();
-
-        ImageButton.ImageButtonStyle muteStyle = new ImageButton.ImageButtonStyle();
-        muteStyle.up = new TextureRegionDrawable(muteTex);
-        muteStyle.over = new TextureRegionDrawable(muteTex).tint(Color.LIGHT_GRAY);
-        muteStyle.down = new TextureRegionDrawable(muteOnTex);
-        muteButton = new ImageButton(muteStyle);
-        muteButton.setSize(60, 60);
-        muteButton.setPosition(GameLauncher.gameWidth - 80f, GameLauncher.gameHeight + 100f);
-
-        muteButton.addListener(new ClickListener(){
-            @Override
-            public void clicked(InputEvent event, float x, float y){
-                SoundManager.toggleMenuMute();
-                // Swap visual: red when muted, navy when unmuted
-                ImageButton.ImageButtonStyle style = muteButton.getStyle();
-                if (SoundManager.isMenuMuted()) {
-                    style.up = new TextureRegionDrawable(muteOnTex);
-                    style.over = new TextureRegionDrawable(muteOnTex).tint(Color.LIGHT_GRAY);
-                } else {
-                    style.up = new TextureRegionDrawable(muteTex);
-                    style.over = new TextureRegionDrawable(muteTex).tint(Color.LIGHT_GRAY);
-                }
-            }
-        });
+        // ── Settings button ──────────────────────────────────────────────────
+        Texture settingsTex = game.manager.get("Buttons/settings.png");
+        ImageButton.ImageButtonStyle settingsStyle = new ImageButton.ImageButtonStyle();
+        settingsStyle.up = new TextureRegionDrawable(settingsTex);
+        settingsStyle.over = new TextureRegionDrawable(settingsTex).tint(Color.LIGHT_GRAY);
+        settingsStyle.down = new TextureRegionDrawable(settingsTex).tint(Color.GRAY);
+        settingsButton = new ImageButton(settingsStyle);
+        settingsButton.setSize(80f, 80f);
+        settingsButton.setPosition(GameLauncher.gameWidth + 300f, GameLauncher.gameHeight + 100f);
 
         wordHuntButton.addListener(new ClickListener(){
             @Override
@@ -320,10 +287,11 @@ public class MainMenu implements Screen {
                     Actions.moveTo(GameLauncher.gameWidth - 220f, 30f, 0.2f, Interpolation.pow2In)
                 )
             );
-            muteButton.addAction(
+            // Settings button animate in
+            settingsButton.addAction(
                 Actions.sequence(
                     Actions.delay(animationDelay + 2.25f),
-                    Actions.moveTo(GameLauncher.gameWidth - 80f, GameLauncher.gameHeight - 80f, 0.2f, Interpolation.pow2In)
+                    Actions.moveTo(GameLauncher.gameWidth - 100f, GameLauncher.gameHeight - 100f, 0.2f, Interpolation.pow2In)
                 )
             );
         } else{
@@ -369,10 +337,11 @@ public class MainMenu implements Screen {
                     Actions.moveTo(GameLauncher.gameWidth - 220f, 30f, 0.2f, Interpolation.pow2In)
                 )
             );
-            muteButton.addAction(
+            // Settings button animate in
+            settingsButton.addAction(
                 Actions.sequence(
                     Actions.delay(1.5f),
-                    Actions.moveTo(GameLauncher.gameWidth - 80f, GameLauncher.gameHeight - 80f, 0.2f, Interpolation.pow2In)
+                    Actions.moveTo(GameLauncher.gameWidth - 100f, GameLauncher.gameHeight - 100f, 0.2f, Interpolation.pow2In)
                 )
             );
         }
@@ -380,16 +349,16 @@ public class MainMenu implements Screen {
         numHuntButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y){
-                game.setScreen(new NumHunt(game));
                 SoundManager.stopBackgroundMusic();
+                game.setScreen(new NumHunt(game));
             }
         });
 
         wordHuntButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new WordHunt(game));
                 SoundManager.stopBackgroundMusic();
+                game.setScreen(new WordHunt(game));
             }
         });
 
@@ -421,6 +390,14 @@ public class MainMenu implements Screen {
             }
         });
 
+        settingsButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                SoundManager.playClick();
+                game.setScreen(new SettingsScreen(game));
+            }
+        });
+
         stage.addActor(logoIntro);
         stage.addActor(aboutButton);
         stage.addActor(wordHuntButton);
@@ -428,6 +405,6 @@ public class MainMenu implements Screen {
         stage.addActor(quitButton);
         stage.addActor(leaderboardButton);
         stage.addActor(instructionsButton);
-        stage.addActor(muteButton);
+        stage.addActor(settingsButton);
     }
 }

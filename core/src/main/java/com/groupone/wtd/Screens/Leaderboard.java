@@ -54,9 +54,9 @@ public class Leaderboard implements Screen {
 
         // ── Textures ──────────────────────────────────────────────────────────
         panelTex = game.manager.get("Buttons/board.png"); // wooden board background
-        rowEvenTex = solidTexture(0x16213eFF); // slightly lighter row
-        rowOddTex = solidTexture(0x0f3460FF); // accent row
-        headerTex = solidTexture(0xe94560FF); // vivid header bar
+        rowEvenTex = solidTexture(0x00000000); // transparent
+        rowOddTex = solidTexture(0x00000000); // transparent
+        headerTex = solidTexture(0x00000000); // transparent
 
         // ── Fonts ─────────────────────────────────────────────────────────────
         BitmapFont titleFont = Utils.createFont("number_font.ttf", 52, 3);
@@ -103,12 +103,12 @@ public class Leaderboard implements Screen {
 
         // Column positions — properly spaced across the wider panel
         float[] colX = {
-                panelX + 30f, // #
-                panelX + 80f, // NAME
-                panelX + 400f, // SCORE
-                panelX + 570f, // MODE
-                panelX + 730f, // DATE
-                panelX + 930f // TIME
+                panelX + 60f, // #
+                panelX + 110f, // NAME
+                panelX + 430f, // SCORE
+                panelX + 600f, // MODE
+                panelX + 760f, // DATE
+                panelX + 960f // TIME
         };
         String[] headers = { "#", "NAME", "SCORE", "MODE", "DATE", "TIME" };
         for (int i = 0; i < headers.length; i++) {
@@ -160,12 +160,12 @@ public class Leaderboard implements Screen {
             dateLbl.setAlignment(Align.left);
             timeLbl.setAlignment(Align.left);
 
-            table.add(rankLbl).width(rankW).padLeft(10f).padBottom(6f);
+            table.add(rankLbl).width(rankW).padLeft(40f).padBottom(6f);
             table.add(nameLbl).width(nameW).padBottom(6f);
             table.add(scoreLbl).width(scoreW).padBottom(6f);
             table.add(modeLbl).width(modeW).padBottom(6f);
             table.add(dateLbl).width(dateW).padBottom(6f);
-            table.add(timeLbl).width(timeW).padBottom(6f);
+            table.add(timeLbl).width(timeW).padLeft(20f).padBottom(6f);
             table.row();
         }
 
@@ -176,34 +176,26 @@ public class Leaderboard implements Screen {
         }
 
         ScrollPane scroll = new ScrollPane(table);
-        scroll.setPosition(panelX + 20f, panelY + 20f);
+        scroll.setPosition(panelX + 20f, panelY + 30f);
         scroll.setSize(panelW - 40f, rowsAreaH - 10f);
         scroll.setScrollingDisabled(true, false);
         stage.addActor(scroll);
         stage.setScrollFocus(scroll);
 
-        // ── Back button (raised) ──────────────────────────────────────────────
-        Texture backTex = solidTexture(0xe94560FF);
-        Texture backOverTex = solidTexture(0xc73652FF);
-        float btnW = 180f, btnH = 50f;
-        float btnX = panelX + (panelW - btnW) / 2f;
-        float btnY = panelY - 10f;
+        // ── Close (X) button — top-right of panel ─────────────────────────────
+        Texture closeTex = game.manager.get("Buttons/close.png");
+        float closeBtnSize = 50f;
 
-        ImageButton.ImageButtonStyle backStyle = new ImageButton.ImageButtonStyle();
-        backStyle.up = new TextureRegionDrawable(backTex);
-        backStyle.over = new TextureRegionDrawable(backOverTex);
-        backStyle.down = new TextureRegionDrawable(backOverTex);
+        ImageButton.ImageButtonStyle closeStyle = new ImageButton.ImageButtonStyle();
+        closeStyle.up = new TextureRegionDrawable(closeTex);
+        closeStyle.over = new TextureRegionDrawable(closeTex).tint(Color.LIGHT_GRAY);
+        closeStyle.down = new TextureRegionDrawable(closeTex).tint(Color.GRAY);
 
-        ImageButton backBtn = new ImageButton(backStyle);
-        backBtn.setSize(btnW, btnH);
-        backBtn.setPosition(btnX, btnY);
+        ImageButton closeBtn = new ImageButton(closeStyle);
+        closeBtn.setSize(closeBtnSize, closeBtnSize);
+        closeBtn.setPosition(panelX + panelW - closeBtnSize - 45f, panelY + panelH - closeBtnSize - 30f);
 
-        Label backLabel = new Label("BACK", headStyle);
-        backLabel.setPosition(btnX + (btnW - backLabel.getPrefWidth()) / 2f,
-                btnY + (btnH - backLabel.getPrefHeight()) / 2f);
-        backLabel.setTouchable(Touchable.disabled); // prevent label from blocking button clicks
-
-        backBtn.addListener(new ClickListener() {
+        closeBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 SoundManager.playClick();
@@ -211,8 +203,7 @@ public class Leaderboard implements Screen {
             }
         });
 
-        stage.addActor(backBtn);
-        stage.addActor(backLabel);
+        stage.addActor(closeBtn);
     }
 
     /** Creates a 1×1 Texture filled with the given RGBA8888 color int. */

@@ -95,11 +95,11 @@ public class InstructionsScreen implements Screen {
         // ── Fallback textures ────────────────────────────────────────────────
         instrBackgroundTex = solidTexture(0x00000099);
         panelTex = game.manager.get("Buttons/board.png"); // wooden board background
-        backBtnTex = solidTexture(0xe94560FF);
-        dividerTex = solidTexture(0xe94560FF);
-        headerTex = solidTexture(0xe94560FF);
-        rowEvenTex = solidTexture(0x16213eFF);
-        rowOddTex = solidTexture(0x0f3460FF);
+        backBtnTex = solidTexture(0x00000000);
+        dividerTex = solidTexture(0x00000000);
+        headerTex = solidTexture(0x00000000);
+        rowEvenTex = solidTexture(0x00000000);
+        rowOddTex = solidTexture(0x00000000);
         numHuntIconTex = solidTexture(0x0f3460FF); // placeholder 64x64 icon
         wordHuntIconTex = solidTexture(0x16213eFF); // placeholder 64x64 icon
 
@@ -142,8 +142,8 @@ public class InstructionsScreen implements Screen {
         // ── Scrollable content ───────────────────────────────────────────────
         Table content = new Table();
         content.top().left();
-        content.defaults().padLeft(20f).padRight(20f);
-        float contentW = panelW - 60f;
+        content.defaults().padLeft(60f).padRight(60f);
+        float contentW = panelW - 140f;
 
         // ── Controls Table ───────────────────────────────────────────────────
         Label controlsTitle = new Label("Controls", sectionStyle);
@@ -280,28 +280,20 @@ public class InstructionsScreen implements Screen {
         stage.addActor(scroll);
         stage.setScrollFocus(scroll);
 
-        // ── Back button ──────────────────────────────────────────────────────
-        Texture backOverTex = solidTexture(0xc73652FF);
-        float btnW = 180f, btnH = 50f;
-        float btnX = panelX + (panelW - btnW) / 2f;
-        float btnY = panelY - 10f;
+        // ── Close (X) button — top-right of panel ─────────────────────────────
+        Texture closeTex = game.manager.get("Buttons/close.png");
+        float closeBtnSize = 50f;
 
-        ImageButton.ImageButtonStyle backStyle = new ImageButton.ImageButtonStyle();
-        backStyle.up = new TextureRegionDrawable(backBtnTex);
-        backStyle.over = new TextureRegionDrawable(backOverTex);
-        backStyle.down = new TextureRegionDrawable(backOverTex);
+        ImageButton.ImageButtonStyle closeStyle = new ImageButton.ImageButtonStyle();
+        closeStyle.up = new TextureRegionDrawable(closeTex);
+        closeStyle.over = new TextureRegionDrawable(closeTex).tint(Color.LIGHT_GRAY);
+        closeStyle.down = new TextureRegionDrawable(closeTex).tint(Color.GRAY);
 
-        ImageButton backBtn = new ImageButton(backStyle);
-        backBtn.setSize(btnW, btnH);
-        backBtn.setPosition(btnX, btnY);
+        ImageButton closeBtn = new ImageButton(closeStyle);
+        closeBtn.setSize(closeBtnSize, closeBtnSize);
+        closeBtn.setPosition(panelX + panelW - closeBtnSize - 45f, panelY + panelH - closeBtnSize - 30f);
 
-        Label backLabel = new Label("BACK", headStyle);
-        backLabel.setPosition(
-                btnX + (btnW - backLabel.getPrefWidth()) / 2f,
-                btnY + (btnH - backLabel.getPrefHeight()) / 2f);
-        backLabel.setTouchable(com.badlogic.gdx.scenes.scene2d.Touchable.disabled);
-
-        backBtn.addListener(new ClickListener() {
+        closeBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 SoundManager.playClick();
@@ -309,8 +301,7 @@ public class InstructionsScreen implements Screen {
             }
         });
 
-        stage.addActor(backBtn);
-        stage.addActor(backLabel);
+        stage.addActor(closeBtn);
     }
 
     /** Adds a horizontal accent divider line to the content table. */
