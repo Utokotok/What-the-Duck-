@@ -12,11 +12,10 @@ import com.badlogic.gdx.utils.Timer;
 import com.groupone.wtd.Assets.AnimationManager;
 import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.GameLauncher;
-import com.groupone.wtd.Utils.Utils;
 
 public class Duck {
     private float changeDirectionCD = 0.5f;
-    private float changeDirectionChance = 0.5f;
+    private float changeDirectionChance = 0f;
     private float baseMinSpeed = 100f;
     private float baseMaxSpeed = 400f;
     private float minSpeed = 100f;
@@ -158,6 +157,7 @@ public class Duck {
     private void initializePosition(){
         boolean spawnLeft = MathUtils.randomBoolean();
         position = new Vector2(spawnLeft ? 0 : GameLauncher.gameWidth - duckW, GameLauncher.GROUND_HEIGHT);
+        position = new Vector2(0, GameLauncher.GROUND_HEIGHT);
     }
 
     private void handleRandomDirection(){

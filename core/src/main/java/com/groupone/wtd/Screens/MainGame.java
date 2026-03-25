@@ -243,7 +243,8 @@ abstract class MainGame implements Screen {
 
     private void detectDuckClick(){
         boolean isHit = false;
-        for(Duck duck : ducks){
+        for(int i = ducks.size -  1; i >= 0; i--){
+            Duck duck = ducks.get(i);
             if(duck.getHitBox().contains(mousePos)){
                 SoundManager.playApplause();
                 if(!customDuckHit(duck)){
@@ -252,9 +253,10 @@ abstract class MainGame implements Screen {
                 gun.triggerCry();
                 duck.handleShot();
                 isHit = true;
+                break;
             }
         }
-
+        
         if(!isHit){
             SoundManager.playDisappoint();
             gun.triggerLaugh();
