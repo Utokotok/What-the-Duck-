@@ -93,21 +93,20 @@ public class GameOver {
                         GameLauncher.gameHeight / 2f - gameOverText.getHeight() / 2f + 150, 0.5f,
                         Interpolation.bounceOut)));
         pointsText.addAction(Actions.sequence(
-            Actions.delay(animationDelay),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    SoundManager.playGameOverHalf1();
-                }
-            }),
-            Actions.delay(animationDelay),
-            Actions.moveTo(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, 390, 1f, Interpolation.bounceOut)
-        ));
+                Actions.delay(animationDelay),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        SoundManager.playGameOverHalf1();
+                    }
+                }),
+                Actions.delay(animationDelay),
+                Actions.moveTo(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, 390, 1f,
+                        Interpolation.bounceOut)));
 
         // Try Again and Quit are hidden until OK is clicked
         tryAgain.setVisible(false);
         quit.setVisible(false);
-
 
         buildNameInputUI();
 
@@ -153,7 +152,8 @@ public class GameOver {
 
     /** Shared submit logic — called by both proceed button click and Enter key. */
     private void doSubmit() {
-        if (nameSubmitted) return;
+        if (nameSubmitted)
+            return;
         SoundManager.playClick();
         saveScore();
         validationLabel.setText("Score saved!");
@@ -182,25 +182,23 @@ public class GameOver {
         quit.setPosition(quit.getX(), GameLauncher.gameHeight + 100);
 
         tryAgain.addAction(Actions.sequence(
-            Actions.delay(0.2f),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    SoundManager.playTryAgainDrop();
-                }
-            }),
-            Actions.moveTo(tryAgain.getX(), 250, 0.25f, Interpolation.bounceOut)
-        ));
+                Actions.delay(0.2f),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        SoundManager.playTryAgainDrop();
+                    }
+                }),
+                Actions.moveTo(tryAgain.getX(), 250, 0.25f, Interpolation.bounceOut)));
         quit.addAction(Actions.sequence(
-            Actions.delay(0.45f),
-            Actions.moveTo(quit.getX(), 110, 0.25f, Interpolation.bounceOut),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    isAnimationDone = true;
-                }
-            })
-        ));
+                Actions.delay(0.45f),
+                Actions.moveTo(quit.getX(), 110, 0.25f, Interpolation.bounceOut),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        isAnimationDone = true;
+                    }
+                })));
     }
 
     private void buildNameInputUI() {
@@ -315,8 +313,7 @@ public class GameOver {
                     public void run() {
                         stage.setKeyboardFocus(nameField);
                     }
-                })
-        ));
+                })));
         validationLabel.addAction(Actions.sequence(
                 Actions.delay(dropOne),
                 Actions.moveTo(startX, validY, dropDur, Interpolation.bounceOut)));

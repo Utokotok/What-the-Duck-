@@ -48,21 +48,30 @@ abstract class MainGame implements Screen {
     GameOver gameOver;
     Animation<TextureRegion> gunShotFrames;
     ShapeRenderer shapeRenderer;
-    Vector2 gameCenter = new Vector2(0,0);
+    Vector2 gameCenter = new Vector2(0, 0);
     Vector3 mouseOrigPos = new Vector3();
     Vector2 mousePos = new Vector2();
     Stage flashStage;
+
     protected abstract void customLogic();
+
     protected abstract void customInput();
+
     protected abstract void drawCustomMidGround();
+
     protected abstract void drawCustomForeground();
+
     protected abstract void customClick();
+
     protected abstract boolean isClickable();
+
     protected abstract void customShape();
+
     protected abstract void customText();
+
     protected abstract void customFailHit();
 
-    public MainGame(GameLauncher game){
+    public MainGame(GameLauncher game) {
         this.game = game;
         this.gun = new Gun(game);
         gameOver = new GameOver(game, this);
@@ -93,70 +102,72 @@ abstract class MainGame implements Screen {
         draw();
     }
 
-    private void logic(){
+    private void logic() {
         pauseMenu.update();
-        if(pauseMenu.isExpanded) return;
+        if (pauseMenu.isExpanded)
+            return;
         flashStage.act(Gdx.graphics.getDeltaTime());
-        if(isGameOver){
+        if (isGameOver) {
             gameOver.updateGameOver(Gdx.graphics.getDeltaTime());
             return;
         }
         timeRemaining = Math.max(timeRemaining - Gdx.graphics.getDeltaTime(), 0);
-        //randomly spawn clouds
-//        spawnClouds();
-        //update cloud, duck, gun
-//        updateClouds();
+        // randomly spawn clouds
+        // spawnClouds();
+        // update cloud, duck, gun
+        // updateClouds();
         updateDucks();
         customLogic();
         gun.updateState();
         egg.updateState();
     }
 
-    private void input(){
-        //detect clicks
-        if(pauseMenu.isExpanded) return;
+    private void input() {
+        // detect clicks
+        if (pauseMenu.isExpanded)
+            return;
         handleClick();
         updateMousePos();
         customInput();
     }
 
-    private void drawForeground(){
-        //bush
+    private void drawForeground() {
+        // bush
         game.batch.draw(bush, 0, 0, GameLauncher.gameWidth, GameLauncher.gameHeight);
-        //gun
+        // gun
         gun.getSprite(mousePos).draw(game.batch);
-        //cloud
-//        drawClouds();
-        //egg
+        // cloud
+        // drawClouds();
+        // egg
         drawCustomForeground();
         egg.getSprite().draw(game.batch);
     }
 
-    private void drawMidGround(){
-        //ducks
+    private void drawMidGround() {
+        // ducks
         drawDucks();
         drawCustomMidGround();
     }
 
-    private void drawBackground(){
-        //background
+    private void drawBackground() {
+        // background
         game.batch.draw(background, 0, 0, GameLauncher.gameWidth, GameLauncher.gameHeight);
     }
 
-    private void drawShape(){
+    private void drawShape() {
         Gdx.gl.glEnable(GL20.GL_BLEND);
         Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
         shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         shapeRenderer.setColor(Color.BLACK);
-        shapeRenderer.setColor(0,0,0, 0.5f);
+        shapeRenderer.setColor(0, 0, 0, 0.5f);
         drawRoundedRect(20, 110, 200, 90, 10);
         customShape();
         shapeRenderer.end();
         Gdx.gl.glDisable(GL20.GL_BLEND);
     }
 
-    private void drawText(){
+    private void drawText() {
         game.batch.begin();
         game.UIFont3.draw(game.batch, "TIME REMAINING", 35, 188);
         game.numberFont.draw(game.batch, String.format("%05.2f", timeRemaining), 60, 163);
@@ -164,12 +175,12 @@ abstract class MainGame implements Screen {
         game.batch.end();
     }
 
-    private void draw(){
-        //setup initialization
+    private void draw() {
+        // setup initialization
         ScreenUtils.clear(Color.BLACK);
         game.viewport.apply();
         game.batch.setProjectionMatrix(game.viewport.getCamera().combined);
-        //begin drawing
+        // begin drawing
         game.batch.begin();
         drawBackground();
         drawMidGround();
@@ -178,13 +189,13 @@ abstract class MainGame implements Screen {
         drawShape();
         drawText();
 
-        if(pauseMenu.isExpanded ||  isGameOver){
+        if (pauseMenu.isExpanded || isGameOver) {
             Gdx.gl.glEnable(GL20.GL_BLEND);
             Gdx.gl.glBlendFunc(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
             shapeRenderer.setProjectionMatrix(game.viewport.getCamera().combined);
             shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
 
-            if(pauseMenu.isExpanded || isGameOver){
+            if (pauseMenu.isExpanded || isGameOver) {
                 expandPause();
             }
 
@@ -192,48 +203,48 @@ abstract class MainGame implements Screen {
             Gdx.gl.glDisable(GL20.GL_BLEND);
         }
 
-        if(isGameOver){
+        if (isGameOver) {
             gameOver.getStage().draw();
         }
         flashStage.draw();
         pauseMenu.getStage().draw();
     }
 
-    //functions for clouds
-    private void spawnClouds(){
+    // functions for clouds
+    private void spawnClouds() {
         cloudSpawnerState += Gdx.graphics.getDeltaTime();
-        if(cloudSpawnerState >= cloudSpawnerCD){
+        if (cloudSpawnerState >= cloudSpawnerCD) {
             clouds.add(new Cloud(game));
             cloudSpawnerCD = MathUtils.random(2, 5);
             cloudSpawnerState = 0f;
         }
     }
 
-    private void updateClouds(){
-        for(Cloud cloud : clouds){
+    private void updateClouds() {
+        for (Cloud cloud : clouds) {
             cloud.updateState();
         }
-        for(int i = clouds.size - 1; i >= 0; i--){
-            if(clouds.get(i).isRemovable){
+        for (int i = clouds.size - 1; i >= 0; i--) {
+            if (clouds.get(i).isRemovable) {
                 clouds.removeIndex(i);
             }
         }
     }
 
-    private void drawClouds(){
-        for(Cloud cloud : clouds){
+    private void drawClouds() {
+        for (Cloud cloud : clouds) {
             cloud.getSprite().draw(game.batch);
         }
     }
 
-    //functions for ducks
+    // functions for ducks
     protected abstract void spawnDucks();
 
-    private void updateDucks(){
-        for(int i = ducks.size - 1; i >= 0; i--){
+    private void updateDucks() {
+        for (int i = ducks.size - 1; i >= 0; i--) {
             Duck duck = ducks.get(i);
             duck.updateState();
-            if(duck.isRemovable){
+            if (duck.isRemovable) {
                 ducks.removeIndex(i);
             }
         }
@@ -241,40 +252,41 @@ abstract class MainGame implements Screen {
 
     protected abstract boolean customDuckHit(Duck duck);
 
-    private void detectDuckClick(){
+    private void detectDuckClick() {
         boolean isHit = false;
-        for(int i = ducks.size -  1; i >= 0; i--){
+        for (int i = ducks.size - 1; i >= 0; i--) {
             Duck duck = ducks.get(i);
-            if(duck.getHitBox().contains(mousePos)){
-                SoundManager.playApplause();
-                if(!customDuckHit(duck)){
-                    return;
+            if (duck.getHitBox().contains(mousePos)) {
+                if (!customDuckHit(duck)) {
+                    break;
                 }
+                SoundManager.playApplause();
                 gun.triggerCry();
                 duck.handleShot();
                 isHit = true;
                 break;
             }
         }
-        
-        if(!isHit){
+
+        if (!isHit) {
             SoundManager.playDisappoint();
             gun.triggerLaugh();
             customFailHit();
         }
     }
 
-    private void drawDucks(){
-        for(Duck duck : ducks){
+    private void drawDucks() {
+        for (Duck duck : ducks) {
             duck.getSprite().draw(game.batch);
         }
     }
 
-    //function for clicks
-    private void handleClick(){
-        if(handler.wasClicked() && gun.reloadCD >= gun.RELOAD_TIME && shootableArea.contains(mousePos)){
-            if(isGameOver) return;
-            if(!isClickable()){
+    // function for clicks
+    private void handleClick() {
+        if (handler.wasClicked() && gun.reloadCD >= gun.RELOAD_TIME && shootableArea.contains(mousePos)) {
+            if (isGameOver)
+                return;
+            if (!isClickable()) {
                 SoundManager.playReload();
                 return;
             }
@@ -297,17 +309,16 @@ abstract class MainGame implements Screen {
         shapeRenderer.arc(x + radius, y + height - radius, radius, 90f, 90f); // TL
     }
 
-
-    private void updateMousePos(){
-        if(Gdx.input.getDeltaX() != 0 || Gdx.input.getDeltaY() != 0){
+    private void updateMousePos() {
+        if (Gdx.input.getDeltaX() != 0 || Gdx.input.getDeltaY() != 0) {
             mouseOrigPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             game.viewport.unproject(mouseOrigPos);
             mousePos.set(mouseOrigPos.x, mouseOrigPos.y);
         }
     }
 
-    private void expandPause(){
-        shapeRenderer.setColor(0,0,0, 0.8f);
+    private void expandPause() {
+        shapeRenderer.setColor(0, 0, 0, 0.8f);
         shapeRenderer.rect(0, 0, GameLauncher.gameWidth, GameLauncher.gameHeight);
     }
 
