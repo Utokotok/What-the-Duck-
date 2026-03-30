@@ -157,7 +157,6 @@ public class Duck {
     private void initializePosition(){
         boolean spawnLeft = MathUtils.randomBoolean();
         position = new Vector2(spawnLeft ? 0 : GameLauncher.gameWidth - duckW, GameLauncher.GROUND_HEIGHT);
-        position = new Vector2(0, GameLauncher.GROUND_HEIGHT);
     }
 
     private void handleRandomDirection(){

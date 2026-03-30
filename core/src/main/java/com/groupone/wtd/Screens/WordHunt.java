@@ -43,12 +43,8 @@ public class WordHunt extends MainGame {
         if (targetWordHitArr.isEmpty()) {
             ducks.size = 0;
             level++;
-            System.out.println("Total shots: " + shots);
             timeRemaining += Math.max(10f, 20 - level * 2f);
-            shots -= duckLetters.length - 2;
-            points += (int) ((baseScore / Math.max(shots, 1)));
-            System.out.println("BS: " + baseScore);
-            System.out.println("Shots: " + shots);
+            points += (int) Math.max(0, baseScore - (Math.max(0, shots - 5) * 20));
             shots = 0;
             generateRandomWord();
             spawnDucks();

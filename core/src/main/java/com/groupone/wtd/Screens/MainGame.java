@@ -126,8 +126,8 @@ abstract class MainGame implements Screen {
         // detect clicks
         if (pauseMenu.isExpanded)
             return;
-        handleClick();
         updateMousePos();
+        handleClick();
         customInput();
     }
 
