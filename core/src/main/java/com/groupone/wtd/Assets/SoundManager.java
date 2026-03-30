@@ -229,6 +229,28 @@ public class SoundManager {
         gameoverDrop.setVolume(id3, 1.0f * globalVolume);
     }
 
+    /**
+     * Zero-point special case: plays gameover_drop.mp3 but stops it halfway through.
+     * Uses a Timer to stop the sound after half its duration.
+     */
+    public static void playGameOverDropHalf() {
+        final long id1 = gameoverDrop.play();
+        final long id2 = gameoverDrop.play();
+        final long id3 = gameoverDrop.play();
+        gameoverDrop.setVolume(id1, 1.0f * globalVolume);
+        gameoverDrop.setVolume(id2, 1.0f * globalVolume);
+        gameoverDrop.setVolume(id3, 1.0f * globalVolume);
+        // Stop after half the clip duration (adjust seconds to match actual audio length)
+        Timer.schedule(new Timer.Task() {
+            @Override
+            public void run() {
+                gameoverDrop.stop(id1);
+                gameoverDrop.stop(id2);
+                gameoverDrop.stop(id3);
+            }
+        }, 1.63f); // stops halfway through gameover_drop.mp3
+    }
+
     public static void playTryAgainDrop(){
         // Playing sound 3 times simultaneously to artificially boost volume
         long id1 = tryagainDrop.play();

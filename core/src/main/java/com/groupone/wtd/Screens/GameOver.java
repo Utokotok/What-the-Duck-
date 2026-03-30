@@ -80,41 +80,24 @@ public class GameOver {
         gameOverText.setPosition(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f, GameLauncher.gameHeight);
         pointsText.setPosition(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, GameLauncher.gameHeight + 100);
         stage.addActor(Assets.getFlash());
-        gameOverText.addAction(Actions.sequence(
-                Actions.delay(animationDelay),
-                Actions.run(new Runnable() {
-                    @Override
-                    public void run() {
-                        stage.addActor(Assets.getFlash());
-                        SoundManager.playGameOverDrop();
-                    }
-                }),
-                Actions.moveTo(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f,
-                        GameLauncher.gameHeight / 2f - gameOverText.getHeight() / 2f + 150, 0.5f,
-                        Interpolation.bounceOut)));
-        pointsText.addAction(Actions.sequence(
-            Actions.delay(animationDelay),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    SoundManager.playGameOverHalf1();
-                }
-            }),
-            Actions.delay(animationDelay),
-            Actions.moveTo(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, 390, 1f, Interpolation.bounceOut)
-        ));
 
-        // Try Again and Quit are hidden until OK is clicked
+        // Add base actors — name input UI is added later in setReason() so it renders on top
+        stage.addActor(tryAgain);
+        stage.addActor(quit);
+        stage.addActor(gameOverText);
+        stage.addActor(pointsText);
+
+        // Try Again and Quit hidden until animations complete
         tryAgain.setVisible(false);
         quit.setVisible(false);
 
-
-        buildNameInputUI();
-
+        // Listeners are set up here but the animation branching is deferred to
+        // setReason(), which is called when the game actually ends and points
+        // have their final value.
         tryAgain.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                saveScore();
+                if (currGame.points > 0) saveScore();
                 if (currGame instanceof WordHunt) {
                     game.setScreen(new WordHunt(game));
                 } else {
@@ -133,7 +116,7 @@ public class GameOver {
         quit.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                saveScore();
+                if (currGame.points > 0) saveScore();
                 game.setScreen(new MainMenu(game));
             }
 
@@ -144,16 +127,102 @@ public class GameOver {
                 }
             }
         });
+    }
 
-        stage.addActor(tryAgain);
-        stage.addActor(quit);
-        stage.addActor(gameOverText);
-        stage.addActor(pointsText);
+    /**
+     * Called when the game actually ends — points have their final value here.
+     * Starts the correct animation branch (zero vs non-zero).
+     */
+    public void setReason(int reason) {
+        this.reason = reasons[reason][MathUtils.random(0, 4)];
+        gameOverText.setText(this.reason);
+        SoundManager.stopBackgroundMusic();
+
+        final boolean zeroPoints = (currGame.points == 0);
+
+        if (zeroPoints) {
+            // ── Zero-point special case ──────────────────────────────────────────
+            // Play gameover_drop but cut it in half, skip name input, go to try-again.
+            gameOverText.addAction(Actions.sequence(
+                    Actions.delay(animationDelay),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.addActor(Assets.getFlash());
+                            SoundManager.playGameOverDropHalf(); // cut halfway
+                        }
+                    }),
+                    Actions.moveTo(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f,
+                            GameLauncher.gameHeight / 2f - gameOverText.getHeight() / 2f + 150, 0.5f,
+                            Interpolation.bounceOut)));
+            pointsText.addAction(Actions.sequence(
+                    Actions.delay(animationDelay),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            SoundManager.playGameOverHalf1();
+                        }
+                    }),
+                    Actions.delay(animationDelay),
+                    Actions.moveTo(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, 390, 1f,
+                            Interpolation.bounceOut)));
+
+            // After the points text lands, drop the buttons directly.
+            float zeroDelay = animationDelay + animationDelay + 1f + 0.2f;
+            tryAgain.addAction(Actions.sequence(
+                    Actions.delay(zeroDelay),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            tryAgain.setVisible(true);
+                            quit.setVisible(true);
+                            SoundManager.playTryAgainDrop();
+                        }
+                    }),
+                    Actions.moveTo(tryAgain.getX(), 250, 0.25f, Interpolation.bounceOut)));
+            quit.addAction(Actions.sequence(
+                    Actions.delay(zeroDelay + 0.25f),
+                    Actions.moveTo(quit.getX(), 110, 0.25f, Interpolation.bounceOut),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            isAnimationDone = true;
+                        }
+                    })));
+        } else {
+            // ── Normal (non-zero) flow ───────────────────────────────────────────
+            gameOverText.addAction(Actions.sequence(
+                    Actions.delay(animationDelay),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            stage.addActor(Assets.getFlash());
+                            SoundManager.playGameOverDrop();
+                        }
+                    }),
+                    Actions.moveTo(GameLauncher.gameWidth / 2f - gameOverText.getWidth() / 2f,
+                            GameLauncher.gameHeight / 2f - gameOverText.getHeight() / 2f + 150, 0.5f,
+                            Interpolation.bounceOut)));
+            pointsText.addAction(Actions.sequence(
+                    Actions.delay(animationDelay),
+                    Actions.run(new Runnable() {
+                        @Override
+                        public void run() {
+                            SoundManager.playGameOverHalf1();
+                        }
+                    }),
+                    Actions.delay(animationDelay),
+                    Actions.moveTo(GameLauncher.gameWidth / 2f - pointsText.getWidth() / 2f, 390, 1f,
+                            Interpolation.bounceOut)));
+
+            buildNameInputUI();
+        }
     }
 
     /** Shared submit logic — called by both proceed button click and Enter key. */
     private void doSubmit() {
-        if (nameSubmitted) return;
+        if (nameSubmitted)
+            return;
         SoundManager.playClick();
         saveScore();
         validationLabel.setText("Score saved!");
@@ -182,25 +251,23 @@ public class GameOver {
         quit.setPosition(quit.getX(), GameLauncher.gameHeight + 100);
 
         tryAgain.addAction(Actions.sequence(
-            Actions.delay(0.2f),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    SoundManager.playTryAgainDrop();
-                }
-            }),
-            Actions.moveTo(tryAgain.getX(), 250, 0.25f, Interpolation.bounceOut)
-        ));
+                Actions.delay(0.2f),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        SoundManager.playTryAgainDrop();
+                    }
+                }),
+                Actions.moveTo(tryAgain.getX(), 250, 0.25f, Interpolation.bounceOut)));
         quit.addAction(Actions.sequence(
-            Actions.delay(0.45f),
-            Actions.moveTo(quit.getX(), 110, 0.25f, Interpolation.bounceOut),
-            Actions.run(new Runnable() {
-                @Override
-                public void run() {
-                    isAnimationDone = true;
-                }
-            })
-        ));
+                Actions.delay(0.45f),
+                Actions.moveTo(quit.getX(), 110, 0.25f, Interpolation.bounceOut),
+                Actions.run(new Runnable() {
+                    @Override
+                    public void run() {
+                        isAnimationDone = true;
+                    }
+                })));
     }
 
     private void buildNameInputUI() {
@@ -315,8 +382,7 @@ public class GameOver {
                     public void run() {
                         stage.setKeyboardFocus(nameField);
                     }
-                })
-        ));
+                })));
         validationLabel.addAction(Actions.sequence(
                 Actions.delay(dropOne),
                 Actions.moveTo(startX, validY, dropDur, Interpolation.bounceOut)));
@@ -351,12 +417,6 @@ public class GameOver {
         Texture t = new Texture(pm);
         pm.dispose();
         return t;
-    }
-
-    public void setReason(int reason) {
-        this.reason = reasons[reason][MathUtils.random(0, 4)];
-        gameOverText.setText(this.reason);
-        SoundManager.stopBackgroundMusic();
     }
 
     public void updateGameOver(float delta) {
