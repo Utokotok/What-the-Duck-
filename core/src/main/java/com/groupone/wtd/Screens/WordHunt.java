@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
+import com.groupone.wtd.Assets.SoundManager;
 import com.groupone.wtd.Entities.Duck;
 import com.groupone.wtd.Entities.Word;
 import com.groupone.wtd.GameLauncher;
@@ -140,10 +141,15 @@ public class WordHunt extends MainGame {
     }
 
     @Override
-    protected void customFailHit() { streak = 1; }
+    protected void customFailHit() { 
+        streak = 1; 
+        updateMusicByStreak();
+    }
 
     public WordHunt(GameLauncher game) {
         super(game);
+        SoundManager.setGameMusic();
+        SoundManager.playBackgroundMusic();
         charGenerator = new FreeTypeFontGenerator(Gdx.files.internal("number_font.ttf"));
         charParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
         charParameter.size = 45;
@@ -201,7 +207,14 @@ public class WordHunt extends MainGame {
             hitChar = duckLetter;
             gun.charReloadGun();
         }
+        updateMusicByStreak();
         return true;
+    }
+
+    private void updateMusicByStreak() {
+        if (streak < 3) SoundManager.setGameMusicLevel(1);
+        else if (streak < 5) SoundManager.setGameMusicLevel(2);
+        else SoundManager.setGameMusicLevel(3);
     }
 
     public void generateRandomWord() {

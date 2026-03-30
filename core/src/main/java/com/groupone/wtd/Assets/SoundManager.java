@@ -8,11 +8,58 @@ import com.groupone.wtd.GameLauncher;
 
 public class SoundManager {
     private static Sound gunShoot;
-    private static float voiceVolume = 0.2f;
+    private static float voiceVolume = 0.15f;
     private static float gunVolume = 1f;
     private static float duckVolume = 1f;
     private static long backgroundID;
     private static float backgroundVolume = 1f;
+    private static float sfxVolume = 1f;
+
+    // ── Global / Master volume (0.0 – 1.0) ───────────────────────────────────
+    private static float globalVolume = 1.0f;
+
+    // ── Setters & Getters ────────────────────────────────────────────────────
+    private static void updateBackgroundMusicVolume() {
+        if (backgroundMusic != null) {
+            float volume = backgroundVolume * globalVolume;
+            if (currentGameMusicLevel >= 1 && currentGameMusicLevel <= 3) {
+                volume *= 0.6f;
+            }
+            backgroundMusic.setVolume(volume);
+        }
+    }
+
+    public static void setGlobalVolume(float v) {
+        globalVolume = MathUtils.clamp(v, 0f, 1f);
+        updateBackgroundMusicVolume();
+    }
+    public static float getGlobalVolume() { return globalVolume; }
+
+    public static void setVoiceVolume(float v) {
+        voiceVolume = MathUtils.clamp(v, 0f, 1f);
+    }
+    public static float getVoiceVolume() { return voiceVolume; }
+
+    public static void setGunVolume(float v) {
+        gunVolume = MathUtils.clamp(v, 0f, 1f);
+    }
+    public static float getGunVolume() { return gunVolume; }
+
+    public static void setDuckVolume(float v) {
+        duckVolume = MathUtils.clamp(v, 0f, 1f);
+    }
+    public static float getDuckVolume() { return duckVolume; }
+
+    public static void setBackgroundVolume(float v) {
+        backgroundVolume = MathUtils.clamp(v, 0f, 1f);
+        updateBackgroundMusicVolume();
+    }
+    public static float getBackgroundVolume() { return backgroundVolume; }
+
+    public static void setSfxVolume(float v) {
+        sfxVolume = MathUtils.clamp(v, 0f, 1f);
+    }
+    public static float getSfxVolume() { return sfxVolume; }
 
     private static final Sound[] duckFall = new Sound[3];
     private static final Sound[] gunCry = new Sound[3];
@@ -23,6 +70,8 @@ public class SoundManager {
     private static final Sound[] operators = new Sound[4];
     private static final Sound[] gameOverAdd = new Sound[3];
     private static Sound gameOver;
+    private static Sound gameoverDrop;
+    private static Sound tryagainDrop;
     private static Sound blox;
     private static Sound wonk;
     private static Sound quit;
@@ -36,6 +85,10 @@ public class SoundManager {
     private static Sound logo;
     private static Sound playAgain;
     private static Music mainMenu;
+    private static Music gameMusic1;
+    private static Music gameMusic2;
+    private static Music gameMusic3;
+    private static int currentGameMusicLevel = 1;
     private static GameLauncher game;
     private static Music backgroundMusic;
 
@@ -53,7 +106,12 @@ public class SoundManager {
         logo = game.manager.get("Sounds/Buttons/logo.mp3");
         switchGun = game.manager.get("Sounds/Guns/switch.mp3");
         mainMenu = game.manager.get("Sounds/Background/main_menu.wav");
+        gameMusic1 = game.manager.get("Sounds/Background/background_music1.wav");
+        gameMusic2 = game.manager.get("Sounds/Background/background_music2.wav");
+        gameMusic3 = game.manager.get("Sounds/Background/background_music3.wav");
         gameOver = game.manager.get("Sounds/GameOver/game_over.mp3");
+        gameoverDrop = game.manager.get("Sounds/GameOver/gameover_drop.mp3");
+        tryagainDrop = game.manager.get("Sounds/GameOver/tryagain_drop.mp3");
         wonk = game.manager.get("Sounds/GameOver/wonk.mp3");
         blox = game.manager.get("Sounds/Buttons/main_menu_blox.mp3");
         operators[0] = game.manager.get("Sounds/Guns/plus.mp3");
@@ -87,17 +145,49 @@ public class SoundManager {
 
     public static void playBackgroundMusic(){
         backgroundMusic.play();
-        backgroundMusic.setVolume(backgroundVolume);
+        updateBackgroundMusicVolume();
     }
 
     public static void setMainMenu(){
+        currentGameMusicLevel = 0;
         backgroundMusic = mainMenu;
         backgroundMusic.setLooping(true);
     }
 
+    public static void setGameMusic() {
+        currentGameMusicLevel = 1;
+        backgroundMusic = gameMusic1;
+        backgroundMusic.setLooping(true);
+    }
+
+    public static void setGameMusicLevel(int level) {
+        if (level == currentGameMusicLevel) return;
+
+        float position = 0f;
+        if (backgroundMusic != null) {
+            position = backgroundMusic.getPosition();
+            backgroundMusic.stop();
+        }
+
+        if (level == 1) {
+            backgroundMusic = gameMusic1;
+        } else if (level == 2) {
+            backgroundMusic = gameMusic2;
+        } else if (level == 3) {
+            backgroundMusic = gameMusic3;
+        }
+
+        backgroundMusic.setLooping(true);
+        currentGameMusicLevel = level;
+        updateBackgroundMusicVolume();
+        
+        backgroundMusic.play();
+        backgroundMusic.setPosition(position);
+    }
+
     public static void playLogo(){
         long id = logo.play();
-        logo.setVolume(id, voiceVolume * 5f);
+        logo.setVolume(id, voiceVolume * 5f * globalVolume);
     }
 
 
@@ -105,101 +195,113 @@ public class SoundManager {
     public static void playApplause(){
         int random = MathUtils.random(0, 10);
         long id = applause[random].play();
-        applause[random].setVolume(id, voiceVolume);
+        applause[random].setVolume(id, voiceVolume * globalVolume);
     }
 
     public static void playBlox(){
         long id = blox.play();
-        blox.setVolume(id, voiceVolume);
+        blox.setVolume(id, voiceVolume * globalVolume);
     }
 
     public static void playDisappoint(){
         int random = MathUtils.random(0, 8);
         long id = disappoint[random].play();
-        disappoint[random].setVolume(id, voiceVolume);
+        disappoint[random].setVolume(id, voiceVolume * globalVolume);
     }
 
     public static void playQuit(){
         long id = quit.play();
-        quit.setVolume(id, voiceVolume);
+        quit.setVolume(id, voiceVolume * globalVolume);
     }
 
-    public static void playGameOver(){
+    public static void playGameOverHalf1(){
         long gameOverID = gameOver.play();
-        gameOver.setVolume(gameOverID, voiceVolume * 2);
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                long wonkID = wonk.play();
-                wonk.setVolume(wonkID, voiceVolume + 0.8f);
-            }
-        }, 1f);
-        Timer.schedule(new Timer.Task() {
-            @Override
-            public void run() {
-                int random = MathUtils.random(0, 2);
-                long id = gameOverAdd[random].play();
-                gameOverAdd[random].setVolume(id, voiceVolume);
-            }
-        }, 2f);
+        gameOver.setVolume(gameOverID, voiceVolume * 2 * globalVolume);
+    }
+
+    public static void playGameOverDrop(){
+        // Playing sound 3 times simultaneously to artificially boost volume
+        long id1 = gameoverDrop.play();
+        long id2 = gameoverDrop.play();
+        long id3 = gameoverDrop.play();
+        gameoverDrop.setVolume(id1, 1.0f * globalVolume);
+        gameoverDrop.setVolume(id2, 1.0f * globalVolume);
+        gameoverDrop.setVolume(id3, 1.0f * globalVolume);
+    }
+
+    public static void playTryAgainDrop(){
+        // Playing sound 3 times simultaneously to artificially boost volume
+        long id1 = tryagainDrop.play();
+        long id2 = tryagainDrop.play();
+        long id3 = tryagainDrop.play();
+        tryagainDrop.setVolume(id1, 1.0f * globalVolume);
+        tryagainDrop.setVolume(id2, 1.0f * globalVolume);
+        tryagainDrop.setVolume(id3, 1.0f * globalVolume);
+    }
+
+    public static void playGameOverHalf2(){
+        int random = MathUtils.random(0, 2);
+        long id = gameOverAdd[random].play();
+        gameOverAdd[random].setVolume(id, voiceVolume * globalVolume);
     }
 
     public static void playNumHunt(){
         long id = numHunt.play();
-        numHunt.setVolume(id, voiceVolume);
+        numHunt.setVolume(id, voiceVolume * globalVolume);
     }
 
     public static void playWordHunt(){
         long id = wordHunt.play();
-        wordHunt.setVolume(id, voiceVolume);
+        wordHunt.setVolume(id, voiceVolume * globalVolume);
     }
 
     public static void playAbout(){
         long id = about.play();
-        about.setVolume(id, voiceVolume);
+        about.setVolume(id, voiceVolume * globalVolume);
     }
 
     public static void playContinue(){
         long id = _continue.play();
-        _continue.setVolume(id, voiceVolume);
+        _continue.setVolume(id, voiceVolume * globalVolume);
     }
 
     public static void playPlayAgain(){
         long id = playAgain.play();
-        playAgain.setVolume(id, voiceVolume);
+        playAgain.setVolume(id, voiceVolume * globalVolume);
     }
 
+    // SFX
     public static void playClick() {
         long id = click.play();
-        click.setVolume(id, voiceVolume * 5f);
+        click.setVolume(id, sfxVolume * globalVolume);
     }
 
     //Gun
     public static void playSwitch(){
         long id = switchGun.play();
-        switchGun.setVolume(id, gunVolume);
+        switchGun.setVolume(id, gunVolume * globalVolume);
     }
 
     public static void playGunCry(){
         int random = MathUtils.random(0, 2);
         long id = gunCry[random].play();
-        gunCry[random].setVolume(id, gunVolume);
+        gunCry[random].setVolume(id, gunVolume * globalVolume);
     }
 
     public static void playGunLaugh(){
         int random = MathUtils.random(0, 2);
         long id = gunLaugh[random].play();
-        gunLaugh[random].setVolume(id, gunVolume);
+        gunLaugh[random].setVolume(id, gunVolume * globalVolume);
     }
 
     public static void playGunShot(){
         long id = gunShoot.play();
-        gunShoot.setVolume(id, gunVolume);
+        gunShoot.setVolume(id, gunVolume * globalVolume);
     }
 
     public static void playReload(){
         long id = reload.play();
-        reload.setVolume(id, gunVolume);
+        reload.setVolume(id, gunVolume * globalVolume);
     }
 
 
@@ -207,17 +309,26 @@ public class SoundManager {
     public static void playDuckFall(){
         int random = MathUtils.random(0, 2);
         long id = duckFall[random].play();
-        duckFall[random].setVolume(id, duckVolume);
+        duckFall[random].setVolume(id, duckVolume * globalVolume);
     }
 
-    //    public static void playOperation(int operator, int number){
-//        operators[operator - 1].play();
-//        Timer.schedule(new Timer.Task() {
-//            @Override
-//            public void run() {
-//                numbers[number - 1].play();
-//            }
-//        }, 0.5f);
-//    }
+    // ── Extra sounds (SFX category) ──────────────────────────────────────────
+    private static Sound buttonPress;
+    private static Sound buttonHover;
+
+    public static void initializeExtraSounds(GameLauncher game) {
+        buttonPress = game.manager.get("Sounds/button_press.mp3");
+        buttonHover = game.manager.get("Sounds/button_hover.mp3");
+    }
+
+    public static void playButtonPress() {
+        long id = buttonPress.play();
+        buttonPress.setVolume(id, sfxVolume * globalVolume);
+    }
+
+    public static void playButtonHover() {
+        long id = buttonHover.play();
+        buttonHover.setVolume(id, sfxVolume * 0.6f * globalVolume);
+    }
 
 }

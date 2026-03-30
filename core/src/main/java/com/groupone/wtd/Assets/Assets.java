@@ -39,7 +39,20 @@ public class Assets {
         manager.load("Buttons/continue.png", Texture.class);
         manager.load("Buttons/try_again.png", Texture.class);
         manager.load("Buttons/about.png", Texture.class);
+        manager.load("Buttons/board.png", Texture.class);
+        manager.load("Buttons/instructions.png", Texture.class);
+        manager.load("Buttons/leaderboards.png", Texture.class);
         manager.load("Buttons/pause.png", Texture.class);
+        manager.load("Buttons/close.png", Texture.class);
+        manager.load("Buttons/input.png", Texture.class);
+        manager.load("Buttons/proceed.png", Texture.class);
+        manager.load("Buttons/volume board.png", Texture.class);
+        manager.load("Buttons/volume circle.png", Texture.class);
+        manager.load("Buttons/settings.png", Texture.class);
+        manager.load("Photos/Gumabon.png", Texture.class);
+        manager.load("Photos/Lalamoro.png", Texture.class);
+        manager.load("Photos/Loplop.png", Texture.class);
+        manager.load("Photos/Macaraig.png", Texture.class);
         manager.load("Background/bush.png", Texture.class);
         manager.load("Background/background.png", Texture.class);
         manager.load("Logo/wtd_logo.png", Texture.class);
@@ -72,8 +85,13 @@ public class Assets {
         manager.load("Sounds/Guns/plus.mp3", Sound.class);
         manager.load("Sounds/Buttons/logo.mp3", Sound.class);
         manager.load("Sounds/GameOver/game_over.mp3", Sound.class);
+        manager.load("Sounds/GameOver/gameover_drop.mp3", Sound.class);
+        manager.load("Sounds/GameOver/tryagain_drop.mp3", Sound.class);
         manager.load("Sounds/GameOver/wonk.mp3", Sound.class);
         manager.load("Sounds/Background/main_menu.wav", Music.class);
+        manager.load("Sounds/Background/background_music1.wav", Music.class);
+        manager.load("Sounds/Background/background_music2.wav", Music.class);
+        manager.load("Sounds/Background/background_music3.wav", Music.class);
         manager.load("Sounds/Buttons/main_menu_blox.mp3", Sound.class);
 
         for(int i = 1; i <= 11; i++){

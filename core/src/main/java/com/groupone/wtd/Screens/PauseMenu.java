@@ -69,6 +69,7 @@ public class PauseMenu {
         quitButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y){
+                SoundManager.stopBackgroundMusic();
                 game.setScreen(new MainMenu(game));
             }
 

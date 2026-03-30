@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
@@ -41,7 +42,7 @@ public class Leaderboard implements Screen {
         InputMultiplexer mux = new InputMultiplexer(stage);
         Gdx.input.setInputProcessor(mux);
 
-        bush       = game.manager.get("Background/bush.png");
+        bush = game.manager.get("Background/bush.png");
         background = game.manager.get("Background/background.png");
 
         buildUI();
@@ -52,23 +53,23 @@ public class Leaderboard implements Screen {
         float H = GameLauncher.gameHeight;
 
         // ── Textures ──────────────────────────────────────────────────────────
-        panelTex  = solidTexture(0x1a1a2eFF);  // deep navy panel
-        rowEvenTex = solidTexture(0x16213eFF); // slightly lighter row
-        rowOddTex  = solidTexture(0x0f3460FF); // accent row
-        headerTex  = solidTexture(0xe94560FF); // vivid header bar
+        panelTex = game.manager.get("Buttons/board.png"); // wooden board background
+        rowEvenTex = solidTexture(0x00000000); // transparent
+        rowOddTex = solidTexture(0x00000000); // transparent
+        headerTex = solidTexture(0x00000000); // transparent
 
         // ── Fonts ─────────────────────────────────────────────────────────────
-        BitmapFont titleFont  = Utils.createFont("number_font.ttf", 52, 3);
-        BitmapFont headFont   = Utils.createFont("string_font.ttf", 22, 2);
-        BitmapFont entryFont  = Utils.createFont("number_font.ttf", 28, 2);
-        BitmapFont rankFont   = Utils.createFont("number_font.ttf", 32, 2);
+        BitmapFont titleFont = Utils.createFont("number_font.ttf", 52, 3);
+        BitmapFont headFont = Utils.createFont("string_font.ttf", 22, 2);
+        BitmapFont entryFont = Utils.createFont("number_font.ttf", 24, 2);
+        BitmapFont rankFont = Utils.createFont("number_font.ttf", 28, 2);
 
         Label.LabelStyle titleStyle = new Label.LabelStyle(titleFont, Color.WHITE);
-        Label.LabelStyle headStyle  = new Label.LabelStyle(headFont,  Color.WHITE);
+        Label.LabelStyle headStyle = new Label.LabelStyle(headFont, Color.WHITE);
         Label.LabelStyle entryStyle = new Label.LabelStyle(entryFont, Color.WHITE);
-        Label.LabelStyle goldStyle  = new Label.LabelStyle(rankFont,  new Color(1f, 0.84f, 0f, 1f));  // gold
-        Label.LabelStyle silverStyle= new Label.LabelStyle(rankFont,  new Color(0.75f, 0.75f, 0.75f, 1f));
-        Label.LabelStyle bronzeStyle= new Label.LabelStyle(rankFont,  new Color(0.8f, 0.5f, 0.2f, 1f));
+        Label.LabelStyle goldStyle = new Label.LabelStyle(rankFont, new Color(1f, 0.84f, 0f, 1f));
+        Label.LabelStyle silverStyle = new Label.LabelStyle(rankFont, new Color(0.75f, 0.75f, 0.75f, 1f));
+        Label.LabelStyle bronzeStyle = new Label.LabelStyle(rankFont, new Color(0.8f, 0.5f, 0.2f, 1f));
 
         // ── Semi-transparent full-screen dimmer ───────────────────────────────
         Texture dimTex = solidTexture(0x00000099);
@@ -76,9 +77,9 @@ public class Leaderboard implements Screen {
         dimmer.setSize(W, H);
         stage.addActor(dimmer);
 
-        // ── Panel ─────────────────────────────────────────────────────────────
-        float panelW = 900f;
-        float panelH = 580f;
+        // ── Panel (widened) ───────────────────────────────────────────────────
+        float panelW = 1100f;
+        float panelH = 600f;
         float panelX = (W - panelW) / 2f;
         float panelY = (H - panelH) / 2f;
 
@@ -89,25 +90,27 @@ public class Leaderboard implements Screen {
 
         // ── Title ─────────────────────────────────────────────────────────────
         Label title = new Label("LEADERBOARD", titleStyle);
-        title.setPosition(panelX + (panelW - title.getPrefWidth()) / 2f, panelY + panelH - 70f);
+        title.setPosition(panelX + (panelW - title.getPrefWidth()) / 2f, panelY + panelH - 90f);
         stage.addActor(title);
 
         // ── Header row ────────────────────────────────────────────────────────
-        float headerH  = 40f;
-        float headerY  = panelY + panelH - 120f;
+        float headerH = 40f;
+        float headerY = panelY + panelH - 140f;
         Image headerBg = new Image(headerTex);
         headerBg.setSize(panelW - 40f, headerH);
         headerBg.setPosition(panelX + 20f, headerY);
         stage.addActor(headerBg);
 
+        // Column positions — properly spaced across the wider panel
         float[] colX = {
-            panelX + 30f,   // Rank
-            panelX + 120f,  // Score
-            panelX + 380f,  // Mode
-            panelX + 600f,  // Date
-            panelX + 760f   // Time
+                panelX + 60f, // #
+                panelX + 110f, // NAME
+                panelX + 430f, // SCORE
+                panelX + 600f, // MODE
+                panelX + 760f, // DATE
+                panelX + 960f // TIME
         };
-        String[] headers = {"#", "SCORE", "MODE", "DATE", "TIME"};
+        String[] headers = { "#", "NAME", "SCORE", "MODE", "DATE", "TIME" };
         for (int i = 0; i < headers.length; i++) {
             Label h = new Label(headers[i], headStyle);
             h.setPosition(colX[i], headerY + 10f);
@@ -120,78 +123,79 @@ public class Leaderboard implements Screen {
         Table table = new Table();
         table.top().left();
 
-        float rowH   = 50f;
+        float rowH = 50f;
         float rowsAreaH = panelH - 170f;
+
+        // Column widths — total should roughly equal panelW - 60 (~1040)
+        float rankW = 50f;
+        float nameW = 300f;
+        float scoreW = 170f;
+        float modeW = 160f;
+        float dateW = 190f;
+        float timeW = 80f;
 
         for (int i = 0; i < entries.size(); i++) {
             LeaderboardManager.Entry e = entries.get(i);
             int rank = i + 1;
 
             Label.LabelStyle rankStyle = (rank == 1) ? goldStyle
-                                       : (rank == 2) ? silverStyle
-                                       : (rank == 3) ? bronzeStyle
-                                       : entryStyle;
+                    : (rank == 2) ? silverStyle
+                            : (rank == 3) ? bronzeStyle
+                                    : entryStyle;
 
             Texture rowBg = (i % 2 == 0) ? rowEvenTex : rowOddTex;
 
-            // Row background
-            Image bg = new Image(rowBg);
-            bg.setSize(panelW - 40f, rowH - 4f);
-
             // Labels — each in its own cell
-            Label rankLbl  = new Label(String.valueOf(rank), rankStyle);
+            Label rankLbl = new Label(String.valueOf(rank), rankStyle);
+            Label nameLbl = new Label(e.name != null && !e.name.isEmpty() ? e.name : "---", entryStyle);
             Label scoreLbl = new Label(String.format("%07d", e.score), entryStyle);
-            Label modeLbl  = new Label(e.gameMode, entryStyle);
-            Label dateLbl  = new Label(e.date, entryStyle);
-            Label timeLbl  = new Label(e.time, entryStyle);
+            Label modeLbl = new Label(e.gameMode, entryStyle);
+            Label dateLbl = new Label(e.date, entryStyle);
+            Label timeLbl = new Label(e.time, entryStyle);
 
             rankLbl.setAlignment(Align.left);
+            nameLbl.setAlignment(Align.left);
             scoreLbl.setAlignment(Align.left);
             modeLbl.setAlignment(Align.left);
             dateLbl.setAlignment(Align.left);
             timeLbl.setAlignment(Align.left);
 
-            table.add(rankLbl).width(80f).padLeft(10f).padBottom(6f);
-            table.add(scoreLbl).width(220f).padBottom(6f);
-            table.add(modeLbl).width(190f).padBottom(6f);
-            table.add(dateLbl).width(170f).padBottom(6f);
-            table.add(timeLbl).width(120f).padBottom(6f);
+            table.add(rankLbl).width(rankW).padLeft(40f).padBottom(6f);
+            table.add(nameLbl).width(nameW).padBottom(6f);
+            table.add(scoreLbl).width(scoreW).padBottom(6f);
+            table.add(modeLbl).width(modeW).padBottom(6f);
+            table.add(dateLbl).width(dateW).padBottom(6f);
+            table.add(timeLbl).width(timeW).padLeft(20f).padBottom(6f);
             table.row();
         }
 
         if (entries.isEmpty()) {
             Label empty = new Label("No scores yet — go play!", entryStyle);
             empty.setAlignment(Align.center);
-            table.add(empty).colspan(5).padTop(40f);
+            table.add(empty).colspan(6).padTop(40f);
         }
 
         ScrollPane scroll = new ScrollPane(table);
-        scroll.setPosition(panelX + 20f, panelY + 20f);
+        scroll.setPosition(panelX + 20f, panelY + 30f);
         scroll.setSize(panelW - 40f, rowsAreaH - 10f);
         scroll.setScrollingDisabled(true, false);
         stage.addActor(scroll);
         stage.setScrollFocus(scroll);
 
-        // ── Back button ───────────────────────────────────────────────────────
-        Texture backTex = solidTexture(0xe94560FF);
-        Texture backOverTex = solidTexture(0xc73652FF);
-        float btnW = 180f, btnH = 50f;
-        float btnX = panelX + (panelW - btnW) / 2f;
-        float btnY = panelY - 70f;
+        // ── Close (X) button — top-right of panel ─────────────────────────────
+        Texture closeTex = game.manager.get("Buttons/close.png");
+        float closeBtnSize = 50f;
 
-        ImageButton.ImageButtonStyle backStyle = new ImageButton.ImageButtonStyle();
-        backStyle.up   = new TextureRegionDrawable(backTex);
-        backStyle.over = new TextureRegionDrawable(backOverTex);
-        backStyle.down = new TextureRegionDrawable(backOverTex);
+        ImageButton.ImageButtonStyle closeStyle = new ImageButton.ImageButtonStyle();
+        closeStyle.up = new TextureRegionDrawable(closeTex);
+        closeStyle.over = new TextureRegionDrawable(closeTex).tint(Color.LIGHT_GRAY);
+        closeStyle.down = new TextureRegionDrawable(closeTex).tint(Color.GRAY);
 
-        ImageButton backBtn = new ImageButton(backStyle);
-        backBtn.setSize(btnW, btnH);
-        backBtn.setPosition(btnX, btnY);
+        ImageButton closeBtn = new ImageButton(closeStyle);
+        closeBtn.setSize(closeBtnSize, closeBtnSize);
+        closeBtn.setPosition(panelX + panelW - closeBtnSize - 45f, panelY + panelH - closeBtnSize - 30f);
 
-        Label backLabel = new Label("BACK", headStyle);
-        backLabel.setPosition(btnX + (btnW - backLabel.getPrefWidth()) / 2f, btnY + (btnH - backLabel.getPrefHeight()) / 2f);
-
-        backBtn.addListener(new ClickListener() {
+        closeBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 SoundManager.playClick();
@@ -199,8 +203,7 @@ public class Leaderboard implements Screen {
             }
         });
 
-        stage.addActor(backBtn);
-        stage.addActor(backLabel);
+        stage.addActor(closeBtn);
     }
 
     /** Creates a 1×1 Texture filled with the given RGBA8888 color int. */
@@ -213,7 +216,9 @@ public class Leaderboard implements Screen {
         return t;
     }
 
-    @Override public void show() {}
+    @Override
+    public void show() {
+    }
 
     @Override
     public void render(float delta) {
@@ -234,8 +239,20 @@ public class Leaderboard implements Screen {
         stage.getViewport().update(width, height, true);
     }
 
-    @Override public void pause() {}
-    @Override public void resume() {}
-    @Override public void hide() {}
-    @Override public void dispose() { stage.dispose(); }
+    @Override
+    public void pause() {
+    }
+
+    @Override
+    public void resume() {
+    }
+
+    @Override
+    public void hide() {
+    }
+
+    @Override
+    public void dispose() {
+        stage.dispose();
+    }
 }

@@ -5,18 +5,18 @@ import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Interpolation;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.*;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.ImageButton;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -38,13 +38,16 @@ public class MainMenu implements Screen {
     ImageButton quitButton;
     ImageButton aboutButton;
     ImageButton leaderboardButton;
-    Texture leaderboardPlaceholderTex;
+    ImageButton instructionsButton;
     Sound buttonPressSound;
     Sound buttonHoverSound;
     Stage stage;
     InputMultiplexer inputMultiplexer;
     Animation<TextureRegion> logoFrames;
     Image logoIntro;
+
+    // ── Settings button ──────────────────────────────────────────────────────
+    ImageButton settingsButton;
 
     Vector2 gameCenter = new Vector2(0,0);
     Texture bush;
@@ -155,6 +158,7 @@ public class MainMenu implements Screen {
             initializeButtons();
             AnimationManager.initializeDucks();
             SoundManager.initializeSound(game);
+            SoundManager.initializeExtraSounds(game);
             playBackgroundMusic();
         }
     }
@@ -169,16 +173,18 @@ public class MainMenu implements Screen {
         aboutButton = Utils.createButton(game.manager.get("Buttons/about.png"), 150, 1500, 0.3f, false);
         quitButton = Utils.createButton(game.manager.get("Buttons/quit.png"), 150, 1500, 0.3f, false);
 
-        // Leaderboard placeholder button (generated programmatically)
-        Pixmap pixmap = new Pixmap(160, 60, Pixmap.Format.RGBA8888);
-        pixmap.setColor(0.18f, 0.22f, 0.42f, 1f); // dark navy fill
-        pixmap.fill();
-        pixmap.setColor(0.91f, 0.27f, 0.38f, 1f); // vivid red border
-        pixmap.drawRectangle(0, 0, 160, 60);
-        pixmap.drawRectangle(1, 1, 158, 58);
-        leaderboardPlaceholderTex = new Texture(pixmap);
-        pixmap.dispose();
-        leaderboardButton = Utils.createButton(leaderboardPlaceholderTex, 1500, 1500, 1f, false);
+        leaderboardButton = Utils.createButton(game.manager.get("Buttons/leaderboards.png"), 1500, 1500, 0.12f, false);
+        instructionsButton = Utils.createButton(game.manager.get("Buttons/instructions.png"), 1500, 1500, 0.12f, false);
+
+        // ── Settings button ──────────────────────────────────────────────────
+        Texture settingsTex = game.manager.get("Buttons/settings.png");
+        ImageButton.ImageButtonStyle settingsStyle = new ImageButton.ImageButtonStyle();
+        settingsStyle.up = new TextureRegionDrawable(settingsTex);
+        settingsStyle.over = new TextureRegionDrawable(settingsTex).tint(Color.LIGHT_GRAY);
+        settingsStyle.down = new TextureRegionDrawable(settingsTex).tint(Color.GRAY);
+        settingsButton = new ImageButton(settingsStyle);
+        settingsButton.setSize(80f, 80f);
+        settingsButton.setPosition(GameLauncher.gameWidth + 300f, GameLauncher.gameHeight + 100f);
 
         wordHuntButton.addListener(new ClickListener(){
             @Override
@@ -272,7 +278,20 @@ public class MainMenu implements Screen {
             leaderboardButton.addAction(
                 Actions.sequence(
                     Actions.delay(animationDelay + 1.75f),
-                    Actions.moveTo(GameLauncher.gameWidth - 190f, 30f, 0.2f, Interpolation.pow2In)
+                    Actions.moveTo(GameLauncher.gameWidth - 110f, 30f, 0.2f, Interpolation.pow2In)
+                )
+            );
+            instructionsButton.addAction(
+                Actions.sequence(
+                    Actions.delay(animationDelay + 2.0f),
+                    Actions.moveTo(GameLauncher.gameWidth - 220f, 30f, 0.2f, Interpolation.pow2In)
+                )
+            );
+            // Settings button animate in
+            settingsButton.addAction(
+                Actions.sequence(
+                    Actions.delay(animationDelay + 2.25f),
+                    Actions.moveTo(GameLauncher.gameWidth - 100f, GameLauncher.gameHeight - 100f, 0.2f, Interpolation.pow2In)
                 )
             );
         } else{
@@ -309,25 +328,37 @@ public class MainMenu implements Screen {
             leaderboardButton.addAction(
                 Actions.sequence(
                     Actions.delay(1.0f),
-                    Actions.moveTo(GameLauncher.gameWidth - 190f, 30f, 0.2f, Interpolation.pow2In)
+                    Actions.moveTo(GameLauncher.gameWidth - 110f, 30f, 0.2f, Interpolation.pow2In)
                 )
             );
-
+            instructionsButton.addAction(
+                Actions.sequence(
+                    Actions.delay(1.25f),
+                    Actions.moveTo(GameLauncher.gameWidth - 220f, 30f, 0.2f, Interpolation.pow2In)
+                )
+            );
+            // Settings button animate in
+            settingsButton.addAction(
+                Actions.sequence(
+                    Actions.delay(1.5f),
+                    Actions.moveTo(GameLauncher.gameWidth - 100f, GameLauncher.gameHeight - 100f, 0.2f, Interpolation.pow2In)
+                )
+            );
         }
 
         numHuntButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y){
-                game.setScreen(new NumHunt(game));
                 SoundManager.stopBackgroundMusic();
+                game.setScreen(new NumHunt(game));
             }
         });
 
         wordHuntButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new WordHunt(game));
                 SoundManager.stopBackgroundMusic();
+                game.setScreen(new WordHunt(game));
             }
         });
 
@@ -345,11 +376,35 @@ public class MainMenu implements Screen {
             }
         });
 
+        aboutButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                game.setScreen(new AboutScreen(game));
+            }
+        });
+
+        instructionsButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                game.setScreen(new InstructionsScreen(game));
+            }
+        });
+
+        settingsButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y){
+                SoundManager.playClick();
+                game.setScreen(new SettingsScreen(game));
+            }
+        });
+
         stage.addActor(logoIntro);
         stage.addActor(aboutButton);
         stage.addActor(wordHuntButton);
         stage.addActor(numHuntButton);
         stage.addActor(quitButton);
         stage.addActor(leaderboardButton);
+        stage.addActor(instructionsButton);
+        stage.addActor(settingsButton);
     }
 }

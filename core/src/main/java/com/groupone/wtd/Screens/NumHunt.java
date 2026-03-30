@@ -117,6 +117,7 @@ public class NumHunt extends MainGame {
     @Override
     protected void customFailHit() {
         streak = 1;
+        updateMusicByStreak();
     }
 
     @Override
@@ -133,6 +134,8 @@ public class NumHunt extends MainGame {
 
     public NumHunt(GameLauncher game) {
         super(game);
+        SoundManager.setGameMusic();
+        SoundManager.playBackgroundMusic();
         generateRandomEquation(minNumber, maxNumber);
         spawnDucks();
     }
@@ -161,7 +164,14 @@ public class NumHunt extends MainGame {
             case 3 -> {currentNumber *= duck.getNumber();}
             case 4 -> {currentNumber /= duck.getNumber();}
         }
+        updateMusicByStreak();
         return true;
+    }
+
+    private void updateMusicByStreak() {
+        if (streak < 3) SoundManager.setGameMusicLevel(1);
+        else if (streak < 5) SoundManager.setGameMusicLevel(2);
+        else SoundManager.setGameMusicLevel(3);
     }
 
     public void generateRandomEquation(int startRange, int endRange){
