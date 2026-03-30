@@ -38,6 +38,7 @@ public class GameLauncher extends Game {
         duckNumberFont = Utils.createFont("number_font.ttf", 70, 2);
 
 
+
         Assets.loadMenuAssets();
         batch = new SpriteBatch();
         viewport = new FitViewport(gameWidth, gameHeight);

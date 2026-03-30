@@ -1,7 +1,6 @@
 package com.groupone.wtd.Screens;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.Color;
@@ -240,14 +239,16 @@ abstract class MainGame implements Screen {
         }
     }
 
-    protected abstract void customDuckHit(Duck duck);
+    protected abstract boolean customDuckHit(Duck duck);
 
     private void detectDuckClick(){
         boolean isHit = false;
         for(Duck duck : ducks){
             if(duck.getHitBox().contains(mousePos)){
                 SoundManager.playApplause();
-                customDuckHit(duck);
+                if(!customDuckHit(duck)){
+                    return;
+                }
                 gun.triggerCry();
                 duck.handleShot();
                 isHit = true;

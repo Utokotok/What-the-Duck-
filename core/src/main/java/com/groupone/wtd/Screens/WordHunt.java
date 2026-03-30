@@ -1,4 +1,241 @@
 package com.groupone.wtd.Screens;
 
-public class WordHunt {
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Queue;
+
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
+import com.badlogic.gdx.math.MathUtils;
+import com.groupone.wtd.Entities.Duck;
+import com.groupone.wtd.Entities.Word;
+import com.groupone.wtd.GameLauncher;
+
+public class WordHunt extends MainGame {
+    int shots = 0;
+    int baseScore = 200;
+    int level = 0;
+    int streak = 1;
+    char hitChar;
+    float changeDirectionCD = 1.2f;
+
+    char[] duckLetters;
+    Queue<Character> targetWordHitArr;
+    ArrayList<Integer> hitCharIndex;
+
+
+    Word wordTargetGenerator = new Word();
+    String wordTargetStr;
+
+    BitmapFont charFont;
+    FreeTypeFontGenerator charGenerator;
+    FreeTypeFontGenerator.FreeTypeFontParameter charParameter;
+    BitmapFont stringFont;
+    FreeTypeFontGenerator stringGenerator;
+    FreeTypeFontGenerator.FreeTypeFontParameter stringParameter;
+
+    @Override
+    protected void customLogic() {
+        if (targetWordHitArr.isEmpty()) {
+            ducks.size = 0;
+            level ++;
+            System.out.println("Total shots: " + shots);
+            timeRemaining += Math.max(10f, 20 - level * 2f);
+            shots -= duckLetters.length  - 2;
+            points += (int) ((baseScore / Math.max(shots,1)) + (baseScore / Math.max(shots,1)) * (streak /  10f));
+            System.out.println("BS: " + baseScore);
+            System.out.println("Shots: " +  shots);
+            shots = 0;
+            generateRandomWord();
+            spawnDucks();
+        }
+
+        if(gun.charCheckIfOutOfAmmo() && !targetWordHitArr.isEmpty()){
+            isGameOver = true;
+            gameOver.setReason(0);
+        } else if(timeRemaining <= 0f){
+            isGameOver = true;
+            gameOver.setReason(2);
+        }
+
+        changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
+
+        for(Duck duck : ducks){
+            duck.setMinMaxVelocity(streak);
+            duck.setChangeDirectionCD(changeDirectionCD);
+        }
+    }
+
+    @Override
+    protected void customInput() {
+    }
+
+    @Override
+    protected void drawCustomMidGround() {
+        for(Duck duck : ducks){
+            charFont.draw(game.batch,
+                String.valueOf(duck.getLetter()),
+                duck.getHitBox().getX() + duck.getHitBox().getWidth() / 2f - 10,
+                duck.getHitBox().getY() + duck.getHitBox().getHeight()
+            );
+
+        }
+    }
+
+    @Override
+    protected void drawCustomForeground() {
+    }
+
+    @Override
+    protected void customClick() {
+        gun.charConsumeAmmo();
+        shots++;
+    }
+
+    @Override
+    protected boolean isClickable() {
+        return gun.charCheckAvailableAmmo();
+    }
+
+    @Override
+    protected void customShape() {
+        drawRoundedRect(20, 10, 180, 90, 10);
+        drawRoundedRect(GameLauncher.gameWidth - 250, 10, 230, 90, 10);
+        drawRoundedRect(GameLauncher.gameWidth - 380, 10, 120, 90, 10);
+    }
+
+    protected void customText() {
+        GlyphLayout letterWidth = new GlyphLayout();
+
+        stringFont.draw(game.batch, "TARGET", 71, 88);
+        letterWidth.setText(charFont, wordTargetStr);
+
+        float xPosition = 11 + (200 - letterWidth.width) / 2f;
+        float yPosition = 63;
+
+        for (int i = 0; i < wordTargetStr.length(); i++) {
+            char c = wordTargetStr.charAt(i);
+
+            if (hitCharIndex.contains(i)) {
+                charFont.setColor(1, 1, 1, 1f);
+            } else {
+                charFont.setColor(1, 1, 1, 0.5f);
+            }
+
+            String letter = String.valueOf(c);
+            letterWidth.setText(charFont, letter);
+            charFont.draw(game.batch, letter, xPosition, yPosition);
+
+            xPosition += letterWidth.width;
+        }
+        stringFont.draw(game.batch, "POINTS", GameLauncher.gameWidth - 175, 88);
+        charFont.setColor(1, 1, 1, 1f);
+        charFont.draw(game.batch, String.format("%07d", points), GameLauncher.gameWidth - 235, 63);
+        stringFont.draw(game.batch, "AMMO", GameLauncher.gameWidth - 352, 88);
+        charFont.draw(game.batch, gun.charCurrentAmmo + "/5", GameLauncher.gameWidth - 360, 63);
+    }
+
+    @Override
+    protected void customFailHit() { streak = 1; }
+
+    public WordHunt(GameLauncher game) {
+        super(game);
+        charGenerator = new FreeTypeFontGenerator(Gdx.files.internal("number_font.ttf"));
+        charParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        charParameter.size = 45;
+        charParameter.color = Color.WHITE;
+        charParameter.borderColor = Color.BLACK;
+        charParameter.borderWidth = 2;
+        charFont = charGenerator.generateFont(charParameter);
+
+        stringGenerator = new FreeTypeFontGenerator(Gdx.files.internal("string_font.ttf"));
+        stringParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+        stringParameter.size = 25;
+        stringParameter.color = Color.WHITE;
+        stringParameter.borderColor = Color.BLACK;
+        stringParameter.borderWidth = 2;
+        stringFont = stringGenerator.generateFont(stringParameter);
+
+        generateRandomWord();
+        spawnDucks();
+    }
+
+    @Override
+    protected void spawnDucks() {
+        ducks.clear();
+
+        for (int i = 0; i < duckLetters.length; i++) {
+            ducks.add(new Duck(game, 300, 500, changeDirectionCD, 0.5f, duckLetters[i]));
+            System.out.println(ducks);
+        }
+    }
+
+    @Override
+    protected boolean customDuckHit(Duck duck) {
+        if(targetWordHitArr.isEmpty() || duck.getLetter() != targetWordHitArr.peek()){
+            return false;
+        }
+
+        char duckLetter = Character.toUpperCase(duck.getLetter());
+        streak++;
+
+        if (targetWordHitArr.contains(duckLetter)) {
+
+            int charIndex = wordTargetStr.indexOf(duckLetter);
+
+            while (charIndex != -1) {
+                if (!hitCharIndex.contains(charIndex)) {
+                    hitCharIndex.add(charIndex);
+                    break;
+                }
+                charIndex = wordTargetStr.indexOf(duckLetter, charIndex + 1);
+            }
+
+            System.out.println("CURRENT INDEX" + hitCharIndex);
+            targetWordHitArr.poll();
+            System.out.println("Updated Array: " + targetWordHitArr);
+            hitChar = duckLetter;
+            gun.charReloadGun();
+        }
+        return true;
+    }
+
+    public void generateRandomWord() {
+        wordTargetStr = wordTargetGenerator.getRandomWord().toUpperCase();
+
+        int wordLength = wordTargetStr.length();
+        System.out.println(wordLength);
+
+        hitCharIndex = new ArrayList<>();
+        targetWordHitArr = new LinkedList<>();
+        duckLetters = new char[wordLength + 2];
+
+        for (char word : wordTargetStr.toCharArray()) {
+            targetWordHitArr.add(word);
+        }
+
+        List<Character> targetWordList = new ArrayList<>(targetWordHitArr);
+        for (int i = 0; i < duckLetters.length; i++) {
+            if (i < wordLength) {
+                duckLetters[i] = targetWordList.get(i);
+            } else {
+                char randomChar;
+                do {
+                    randomChar = (char) ('A' + MathUtils.random(0, 25));
+                } while (contains(duckLetters, randomChar, i));
+                duckLetters[i] = randomChar;
+            }
+        }
+    }
+
+    public boolean contains(char[] array, char letter, int limit) {
+        for (int j = 0; j < limit; j++) {
+            if (array[j] == letter) return true;
+        }
+        return false;
+    }
 }
