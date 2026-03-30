@@ -26,9 +26,10 @@ allprojects {
 
 configure(subprojects) {
   apply plugin: 'java-library'
+  def javaVersion = Integer.parseInt(findProperty('javaVersion').toString())
   java {
     toolchain {
-      languageVersion = JavaLanguageVersion.of(23)
+      languageVersion = JavaLanguageVersion.of(javaVersion)
     }
   }
 

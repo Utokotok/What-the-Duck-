@@ -1,7 +1,6 @@
 package com.groupone.wtd.Entities;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -146,7 +145,7 @@ public class Gun {
         gunSprite.setOrigin(frame.getRegionWidth() / 2f, -80);
         gunSprite.setSize(frame.getRegionWidth(), frame.getRegionHeight());
         gunSprite.setPosition((GameLauncher.gameWidth / 2f) - frame.getRegionWidth() / 2f, -10);
-        gunSprite.setRotation(Math.clamp(MathUtils.atan2Deg(mousePos.y, mousePos.x - GameLauncher.gameWidth / 2f) - 90, -50, 50));
+        gunSprite.setRotation(MathUtils.clamp(MathUtils.atan2Deg(mousePos.y, mousePos.x - GameLauncher.gameWidth / 2f) - 90, -50f, 50f));
         return gunSprite;
     }
 
@@ -172,7 +171,7 @@ public class Gun {
         modeSprite.setSize(frame.getRegionWidth(), frame.getRegionHeight());
         modeSprite.setPosition(60 + GameLauncher.gameWidth / 2f, 250);
         modeSprite.setOrigin((frame.getRegionWidth() / 2f) - 60, -340f);
-        modeSprite.setRotation(Math.clamp(MathUtils.atan2Deg(mousePos.y, mousePos.x - GameLauncher.gameWidth / 2f) - 90, -50, 50));
+        modeSprite.setRotation(MathUtils.clamp(MathUtils.atan2Deg(mousePos.y, mousePos.x - GameLauncher.gameWidth / 2f) - 90, -50f, 50f));
 
         return modeSprite;
     }

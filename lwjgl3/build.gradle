@@ -36,11 +36,12 @@ dependencies {
 }
 
 def os = System.properties['os.name'].toLowerCase(Locale.ROOT)
+def javaVersion = Integer.parseInt(findProperty('javaVersion').toString())
 
 run {
   workingDir = rootProject.file('assets').path
   javaLauncher = javaToolchains.launcherFor {
-    languageVersion = JavaLanguageVersion.of(23)
+    languageVersion = JavaLanguageVersion.of(javaVersion)
   }
 // You can uncomment the next line if your IDE claims a build failure even when the app closed properly.
   //setIgnoreExitValue(true)
