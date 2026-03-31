@@ -8,7 +8,7 @@ import com.groupone.wtd.GameLauncher;
 
 public class SoundManager {
     private static Sound gunShoot;
-    private static float voiceVolume = 0.15f;
+    private static float voiceVolume = 0.5f;
     private static float gunVolume = 1f;
     private static float duckVolume = 1f;
     private static long backgroundID;

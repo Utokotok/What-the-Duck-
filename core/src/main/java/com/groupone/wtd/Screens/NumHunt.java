@@ -26,7 +26,6 @@ public class NumHunt extends MainGame {
     int baseScore = 200;
     float changeDirectionCD = 1.2f;
     int level = 0;
-    int streak = 1;
     int maxNumber = 10;
     int minNumber = 1;
     boolean isSpawning = false;
@@ -57,14 +56,7 @@ public class NumHunt extends MainGame {
             gun.reloadGun();
             spawnDucks();
         }
-
-        changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
-
-        for(Duck duck : ducks){
-            duck.setMinMaxVelocity(streak);
-            duck.setChangeDirectionCD(changeDirectionCD);
-        }
-
+        
     }
 
     @Override
@@ -149,6 +141,12 @@ public class NumHunt extends MainGame {
             public void run() {
                 for(int i = 0; i < duckNumbers.length; i++){
                     ducks.add(new Duck(game, 300, 500, changeDirectionCD, 0.5f, duckNumbers[i]));
+                }
+                changeDirectionCD = Math.max(1.2f - (float) (0.08 * streak), 0.3f);
+
+                for(Duck duck : ducks){
+                    duck.setMinMaxVelocity(streak);
+                    duck.setChangeDirectionCD(changeDirectionCD);
                 }
                 isSpawning = false;
             }

@@ -20,9 +20,7 @@ public class WordHunt extends MainGame {
     int shots = 0;
     int baseScore = 200;
     int level = 0;
-    int streak = 1;
     char hitChar;
-    float changeDirectionCD = 1.2f;
 
     char[] duckLetters;
     Queue<Character> targetWordHitArr;
@@ -56,13 +54,6 @@ public class WordHunt extends MainGame {
         } else if (timeRemaining <= 0f) {
             isGameOver = true;
             gameOver.setReason(2);
-        }
-
-        changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
-
-        for (Duck duck : ducks) {
-            duck.setMinMaxVelocity(streak);
-            duck.setChangeDirectionCD(changeDirectionCD);
         }
     }
 
@@ -171,6 +162,12 @@ public class WordHunt extends MainGame {
         for (int i = 0; i < duckLetters.length; i++) {
             ducks.add(new Duck(game, 300, 500, changeDirectionCD, 0.5f, duckLetters[i]));
             System.out.println(ducks);
+        }
+        changeDirectionCD = Math.max(1.2f - (float) (0.08 * streak), 0.3f);
+
+        for(Duck duck : ducks){
+            duck.setMinMaxVelocity(streak);
+            duck.setChangeDirectionCD(changeDirectionCD);
         }
     }
 

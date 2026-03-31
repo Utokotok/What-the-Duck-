@@ -31,9 +31,11 @@ abstract class MainGame implements Screen {
     final int DUCK_SPAWN_SIZE = 5;
     private float cloudSpawnerCD = 1f;
     private float cloudSpawnerState = 0f;
+    float changeDirectionCD = 1.2f;
     private Array<Cloud> clouds;
     private Rectangle shootableArea;
     boolean isGameOver = false;
+    int streak = 1;
     int points = 0;
     float timeRemaining = 25f;
     PauseMenu pauseMenu;
@@ -272,6 +274,14 @@ abstract class MainGame implements Screen {
             SoundManager.playDisappoint();
             gun.triggerLaugh();
             customFailHit();
+        }
+
+        changeDirectionCD = Math.max(1.2f - (float) (0.08 * streak), 0.3f);
+        // old diff
+        // changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
+        for(Duck duck : ducks){
+            duck.setMinMaxVelocity(streak);
+            duck.setChangeDirectionCD(changeDirectionCD);
         }
     }
 
