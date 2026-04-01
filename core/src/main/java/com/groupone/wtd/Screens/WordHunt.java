@@ -43,7 +43,7 @@ public class WordHunt extends MainGame {
             ducks.size = 0;
             level++;
             timeRemaining += Math.max(10f, 20 - level * 2f);
-            points += (int) Math.max(0, baseScore - (Math.max(0, shots - 5) * 20));
+            points += (int) Math.max(0, baseScore - (Math.max(0, shots - 5) * 20)) + (Math.max(0, baseScore - (Math.max(0, shots - 5) * 20)) * (streak /  10f));
             shots = 0;
             generateRandomWord();
             spawnDucks();
@@ -149,10 +149,11 @@ public class WordHunt extends MainGame {
         float streakLabelY = streakBoxY + streakBoxHeight - 12f;
         stringFont.draw(game.batch, "STREAK", streakLabelX, streakLabelY);
 
-        hudLayout.setText(charFont, String.valueOf(streak));
+        String streakDisplay = streak + "x";
+        hudLayout.setText(charFont, streakDisplay);
         float streakValueX = streakBoxX + (streakBoxWidth - hudLayout.width) / 2f;
         float streakValueY = streakBoxY + 52f; // keep original vertical placement
-        charFont.draw(game.batch, String.valueOf(streak), streakValueX, streakValueY);
+        charFont.draw(game.batch, streakDisplay, streakValueX, streakValueY);
 
         hudLayout.setText(stringFont, "POINTS");
         float pointsLabelX = pointsBoxX + (pointsBoxWidth - hudLayout.width) / 2f;

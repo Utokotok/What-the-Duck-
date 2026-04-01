@@ -176,10 +176,11 @@ public class NumHunt extends MainGame {
         float streakLabelY = streakBoxY + streakBoxHeight - 12f;
         game.UIFont3.draw(game.batch, "STREAK", streakLabelX, streakLabelY);
 
-        hudLayout.setText(game.numberFont, String.valueOf(streak));
+        String streakDisplay = streak + "x";
+        hudLayout.setText(game.numberFont, streakDisplay);
         float streakValueX = streakBoxX + (streakBoxWidth - hudLayout.width) / 2f;
         float streakValueY = streakBoxY + 52f; // keep original vertical placement
-        game.numberFont.draw(game.batch, String.valueOf(streak), streakValueX, streakValueY);
+        game.numberFont.draw(game.batch, streakDisplay, streakValueX, streakValueY);
 
         hudLayout.setText(game.UIFont3, "POINTS");
         float pointsLabelX = pointsBoxX + (pointsBoxWidth - hudLayout.width) / 2f;
