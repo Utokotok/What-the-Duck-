@@ -35,7 +35,7 @@ abstract class MainGame implements Screen {
     private Array<Cloud> clouds;
     private Rectangle shootableArea;
     boolean isGameOver = false;
-    int streak = 1;
+    int streak = 0;
     int points = 0;
     float timeRemaining = 25f;
     PauseMenu pauseMenu;

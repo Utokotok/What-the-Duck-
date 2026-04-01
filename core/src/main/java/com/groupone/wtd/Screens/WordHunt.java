@@ -35,6 +35,7 @@ public class WordHunt extends MainGame {
     BitmapFont stringFont;
     FreeTypeFontGenerator stringGenerator;
     FreeTypeFontGenerator.FreeTypeFontParameter stringParameter;
+    private final GlyphLayout hudLayout = new GlyphLayout();
 
     @Override
     protected void customLogic() {
@@ -92,16 +93,34 @@ public class WordHunt extends MainGame {
         drawRoundedRect(20, 10, 180, 90, 10);
         drawRoundedRect(GameLauncher.gameWidth - 250, 10, 230, 90, 10);
         drawRoundedRect(GameLauncher.gameWidth - 380, 10, 120, 90, 10);
+        float streakBoxWidth = 170f;
+        float streakBoxHeight = 90f;
+        float pointsBoxX = GameLauncher.gameWidth - 250;
+        float pointsBoxWidth = 230f;
+        float streakBoxX = pointsBoxX + pointsBoxWidth - streakBoxWidth; // align right edge with points box
+        drawRoundedRect(streakBoxX, 110, streakBoxWidth, streakBoxHeight, 10);
     }
 
     protected void customText() {
         GlyphLayout letterWidth = new GlyphLayout();
 
-        stringFont.draw(game.batch, "TARGET", 71, 88);
-        letterWidth.setText(charFont, wordTargetStr);
+        float targetBoxX = 20f;
+        float targetBoxWidth = 180f;
+        float boxY = 10f;
+        float boxHeight = 90f;
+        float pointsBoxX = GameLauncher.gameWidth - 250;
+        float pointsBoxWidth = 230f;
+        float ammoBoxX = GameLauncher.gameWidth - 380;
+        float ammoBoxWidth = 120f;
 
-        float xPosition = 11 + (200 - letterWidth.width) / 2f;
-        float yPosition = 63;
+        hudLayout.setText(stringFont, "TARGET");
+        float targetLabelX = targetBoxX + (targetBoxWidth - hudLayout.width) / 2f;
+        float targetLabelY = boxY + boxHeight - 12f;
+        stringFont.draw(game.batch, "TARGET", targetLabelX, targetLabelY);
+
+        hudLayout.setText(charFont, wordTargetStr);
+        float xPosition = targetBoxX + (targetBoxWidth - hudLayout.width) / 2f;
+        float targetValueY = boxY + 52f; // keep original vertical placement for target letters
 
         for (int i = 0; i < wordTargetStr.length(); i++) {
             char c = wordTargetStr.charAt(i);
@@ -114,20 +133,54 @@ public class WordHunt extends MainGame {
 
             String letter = String.valueOf(c);
             letterWidth.setText(charFont, letter);
-            charFont.draw(game.batch, letter, xPosition, yPosition);
+            charFont.draw(game.batch, letter, xPosition, targetValueY);
 
             xPosition += letterWidth.width;
         }
-        stringFont.draw(game.batch, "POINTS", GameLauncher.gameWidth - 175, 88);
+        // Reset full opacity before drawing other HUD values
         charFont.setColor(1, 1, 1, 1f);
-        charFont.draw(game.batch, String.format("%07d", points), GameLauncher.gameWidth - 235, 63);
-        stringFont.draw(game.batch, "AMMO", GameLauncher.gameWidth - 352, 88);
-        charFont.draw(game.batch, gun.charCurrentAmmo + "/5", GameLauncher.gameWidth - 360, 63);
+        float streakBoxWidth = 170f;
+        float streakBoxHeight = 90f;
+        float streakBoxX = pointsBoxX + pointsBoxWidth - streakBoxWidth;
+        float streakBoxY = 110f;
+
+        hudLayout.setText(stringFont, "STREAK");
+        float streakLabelX = streakBoxX + (streakBoxWidth - hudLayout.width) / 2f;
+        float streakLabelY = streakBoxY + streakBoxHeight - 12f;
+        stringFont.draw(game.batch, "STREAK", streakLabelX, streakLabelY);
+
+        hudLayout.setText(charFont, String.valueOf(streak));
+        float streakValueX = streakBoxX + (streakBoxWidth - hudLayout.width) / 2f;
+        float streakValueY = streakBoxY + 52f; // keep original vertical placement
+        charFont.draw(game.batch, String.valueOf(streak), streakValueX, streakValueY);
+
+        hudLayout.setText(stringFont, "POINTS");
+        float pointsLabelX = pointsBoxX + (pointsBoxWidth - hudLayout.width) / 2f;
+        float pointsLabelY = boxY + boxHeight - 12f;
+        stringFont.draw(game.batch, "POINTS", pointsLabelX, pointsLabelY);
+
+        charFont.setColor(1, 1, 1, 1f);
+        String pointsValue = String.format("%07d", points);
+        hudLayout.setText(charFont, pointsValue);
+        float pointsValueX = pointsBoxX + (pointsBoxWidth - hudLayout.width) / 2f;
+        float pointsValueY = boxY + 52f; // keep original vertical placement
+        charFont.draw(game.batch, pointsValue, pointsValueX, pointsValueY);
+
+        hudLayout.setText(stringFont, "AMMO");
+        float ammoLabelX = ammoBoxX + (ammoBoxWidth - hudLayout.width) / 2f;
+        float ammoLabelY = boxY + boxHeight - 12f;
+        stringFont.draw(game.batch, "AMMO", ammoLabelX, ammoLabelY);
+
+        String ammoValue = gun.charCurrentAmmo + "/5";
+        hudLayout.setText(charFont, ammoValue);
+        float ammoValueX = ammoBoxX + (ammoBoxWidth - hudLayout.width) / 2f;
+        float ammoValueY = boxY + 52f; // keep original vertical placement for ammo
+        charFont.draw(game.batch, ammoValue, ammoValueX, ammoValueY);
     }
 
     @Override
     protected void customFailHit() {
-        streak = 1;
+        streak = 0;
         updateMusicByStreak();
     }
 
