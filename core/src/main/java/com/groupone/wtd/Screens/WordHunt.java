@@ -218,7 +218,6 @@ public class WordHunt extends MainGame {
             System.out.println(ducks);
         }
         changeDirectionCD = Math.max(1.2f - (float) (0.08 * streak), 0.3f);
-
         for(Duck duck : ducks){
             duck.setMinMaxVelocity(streak);
             duck.setChangeDirectionCD(changeDirectionCD);
@@ -233,7 +232,6 @@ public class WordHunt extends MainGame {
 
         char duckLetter = Character.toUpperCase(duck.getLetter());
         streak++;
-
         if (targetWordHitArr.contains(duckLetter)) {
 
             int charIndex = wordTargetStr.indexOf(duckLetter);

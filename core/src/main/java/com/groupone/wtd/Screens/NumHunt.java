@@ -224,7 +224,6 @@ public class NumHunt extends MainGame {
                     ducks.add(new Duck(game, 300, 500, changeDirectionCD, 0.5f, duckNumbers[i]));
                 }
                 changeDirectionCD = Math.max(1.2f - (float) (0.08 * streak), 0.3f);
-
                 for(Duck duck : ducks){
                     duck.setMinMaxVelocity(streak);
                     duck.setChangeDirectionCD(changeDirectionCD);

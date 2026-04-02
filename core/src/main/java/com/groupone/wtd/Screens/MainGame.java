@@ -278,7 +278,7 @@ abstract class MainGame implements Screen {
 
         changeDirectionCD = Math.max(1.2f - (float) (0.08 * streak), 0.3f);
         // old diff
-        // changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
+        changeDirectionCD = Math.max(1.2f - (float) Math.log10(streak), 0.3f);
         for(Duck duck : ducks){
             duck.setMinMaxVelocity(streak);
             duck.setChangeDirectionCD(changeDirectionCD);
